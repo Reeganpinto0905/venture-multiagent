@@ -22,17 +22,16 @@ def on_startup():
     print("[SERVER STARTUP] Initializing VentureIQ API Service...")
     validate_rag_env()
 
-ALLOWED_ORIGINS = [
+origins = [
     "http://localhost:5173",
-    "http://127.0.0.1:5173",
     "https://ventureiq-xi.vercel.app",
 ]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=ALLOWED_ORIGINS,
+    allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["GET", "POST", "OPTIONS", "PUT", "DELETE"],
+    allow_methods=["*"],
     allow_headers=["*"],
 )
 
