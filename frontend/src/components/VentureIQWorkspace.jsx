@@ -31,10 +31,11 @@ import { chatWithVentureIQ, analyzeStartup } from '../services/api.js'
 
 const AGENTS = [
   { key: 'supervisor', name: 'Supervisor', detail: 'Determines required intelligence' },
-  { key: 'market', name: 'Market', detail: 'Evaluates market opportunity' },
-  { key: 'competitor', name: 'Competitor', detail: 'Maps competitive landscape' },
-  { key: 'business', name: 'Business', detail: 'Evaluates business viability' },
-  { key: 'risk', name: 'Risk', detail: 'Identifies major risks' },
+  { key: 'retrieval', name: 'RAG Retrieval', detail: 'Retrieves vector knowledge base evidence' },
+  { key: 'market', name: 'Market Agent', detail: 'Evaluates market opportunity & TAM' },
+  { key: 'competitor', name: 'Competitor Agent', detail: 'Maps competitive moat & web research' },
+  { key: 'business', name: 'Business Agent', detail: 'Evaluates unit economics & revenue models' },
+  { key: 'risk', name: 'Risk Agent', detail: 'Identifies regulatory & execution risks' },
 ]
 
 const SUGGESTIONS = [
@@ -49,9 +50,10 @@ const HISTORY_KEY = 'ventureiq_conversations'
 // ---------------------------------------------------------------------------
 
 // Maps our app phases onto the 3D core's animation vocabulary
-// (idle | thinking | question | analyzing | complete).
+// (idle | thinking | question | retrieving | analyzing | complete).
 function toCorePhase(appPhase, chatLoading) {
   if (appPhase === 'conversation') return chatLoading ? 'thinking' : 'question'
+  if (appPhase === 'retrieving') return 'retrieving'
   if (appPhase === 'analyzing') return 'analyzing'
   if (appPhase === 'complete') return 'complete'
   return 'idle'
@@ -1174,6 +1176,9 @@ ${result.risk_analysis || 'N/A'}
 
               <div className="report-grid">
                 <div>
+                  {result.retrieved_context && (
+                    <ResultSection title="Supporting Evidence (RAG Vector Knowledge Base)" eyebrow="00 / Vector Evidence" text={result.retrieved_context} defaultOpen={true} />
+                  )}
                   <ResultSection title="Market Intelligence" eyebrow="01 / Opportunity" text={result.market_analysis} />
                   <ResultSection title="Competitor Intelligence" eyebrow="02 / Landscape" text={result.competitor_analysis} />
                   <ResultSection title="Risk Assessment" eyebrow="03 / Exposure" text={result.risk_analysis} />

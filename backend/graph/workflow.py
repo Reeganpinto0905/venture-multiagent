@@ -9,10 +9,12 @@ from agents.competitor import competitor_agent
 from agents.business import business_agent
 from agents.risk import risk_agent
 from agents.report import report_agent
+from rag.retriever import retrieve_context_node
 
 builder = StateGraph(VentureState)
 
 builder.add_node("supervisor", supervisor_agent)
+builder.add_node("retrieve_context", retrieve_context_node)
 builder.add_node("market", market_agent)
 builder.add_node("competitor", competitor_agent)
 builder.add_node("business", business_agent)
@@ -20,6 +22,7 @@ builder.add_node("risk", risk_agent)
 builder.add_node("report", report_agent)
 
 builder.add_edge(START, "supervisor")
+builder.add_edge("supervisor", "retrieve_context")
 
 # Ordered chain of optional agents. After each one (or if it's skipped),
 # routing falls through to the next task the supervisor actually selected,
@@ -54,7 +57,7 @@ def entry_router(state):
 
 
 builder.add_conditional_edges(
-    "supervisor",
+    "retrieve_context",
     entry_router,
     {**{a: a for a in AGENT_ORDER}, "report": "report"},
 )

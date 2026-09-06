@@ -1,9 +1,10 @@
 def business_agent(state):
 
-    idea = state["user_query"].lower()
+    idea = state.get("user_query", "").lower()
     context = state.get("idea_context", {})
+    retrieved_context = state.get("retrieved_context", "")
     context_text = " ".join(str(v) for v in context.values()).lower()
-    combined = f"{idea} {context_text}"
+    combined = f"{idea} {context_text} {retrieved_context.lower()}"
 
     score = 0
     signals = []

@@ -4,3 +4,4 @@ python-dotenv
 langgraph
 langchain-google-genai
 tavily-python
+pinecone

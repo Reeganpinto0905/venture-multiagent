@@ -6,13 +6,22 @@ load_dotenv()
 
 def risk_agent(state):
     user_query = state.get("user_query", "")
+    retrieved_context = state.get("retrieved_context", "")
+
+    evidence_block = f"\nRetrieved Knowledge / Evidence:\n{retrieved_context}\n" if retrieved_context else "\nRetrieved Knowledge / Evidence: None provided.\n"
 
     prompt = f"""
 Startup Idea & Context:
 {user_query}
-
+{evidence_block}
 Identify top risks (market, execution, regulatory, financial, competitive).
 Provide 1-2 concise bullet points per applicable category (keep total under 180 words).
+
+RAG & Evidence Rules:
+- Distinguish empirical risks supported by retrieved evidence vs speculative execution risks.
+- Do not invent non-existent regulatory policies or fake statistics.
+- If evidence is insufficient, explicitly state the assumption.
+
 Rate overall risk exposure 0-100 (100 = very LOW risk / safe, 0 = very HIGH risk).
 
 Return ONLY valid JSON:

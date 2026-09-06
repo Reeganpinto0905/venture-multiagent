@@ -13,8 +13,14 @@ from pydantic import BaseModel
 from graph.workflow import graph
 from agents.supervisor import supervisor_chat
 from agents.llm_utils import get_gemini_stats
+from rag.retriever import validate_rag_env
 
 app = FastAPI()
+
+@app.on_event("startup")
+def on_startup():
+    print("[SERVER STARTUP] Initializing VentureIQ API Service...")
+    validate_rag_env()
 
 app.add_middleware(
     CORSMiddleware,
@@ -161,7 +167,8 @@ def analyze(data: AnalyzeRequest):
             "business_analysis": result.get("business_analysis", ""),
             "risk_analysis": result.get("risk_analysis", ""),
             "scores": result.get("scores", {}),
-            "summary": result.get("summary", "")
+            "summary": result.get("summary", ""),
+            "retrieved_context": result.get("retrieved_context", "")
         }
 
     except HTTPException:

@@ -11,6 +11,7 @@ const STATE_CONFIG = {
   idle: { spin: 0.06, sparkles: 60, pulse: 0.15, ringSpeed: 0.1 },
   thinking: { spin: 0.16, sparkles: 90, pulse: 0.35, ringSpeed: 0.22 },
   question: { spin: 0.1, sparkles: 75, pulse: 0.5, ringSpeed: 0.16 },
+  retrieving: { spin: 0.24, sparkles: 120, pulse: 0.45, ringSpeed: 0.3 },
   analyzing: { spin: 0.32, sparkles: 140, pulse: 0.6, ringSpeed: 0.42 },
   complete: { spin: 0.05, sparkles: 40, pulse: 0.2, ringSpeed: 0.08 },
 }

@@ -19,6 +19,25 @@ DEFAULT_IDEA_CONTEXT = {
 }
 
 
+OUT_OF_SCOPE_MESSAGE = (
+    "⚠️ This is outside the scope of your startup analysis. Please ask something related to your idea, customers, problem, solution, market, competitors, business model, or validation."
+)
+
+OFF_TOPIC_PATTERNS = [
+    "buil me a website", "build me a website", "make me a website", "create a website", "build a website",
+    "buil me an app", "build me an app", "make me an app", "create an app", "build an app",
+    "write code", "write python", "write a script", "code me a", "create a script", "write a program",
+    "tell me a joke", "what is the capital", "who is the president", "solve this math", "solve this equation",
+    "do my homework", "what is the weather", "write an essay"
+]
+
+
+def _is_off_topic_query(text: str) -> bool:
+    """Helper to detect off-topic execution requests deterministically."""
+    lower = text.lower().strip()
+    return any(pat in lower for pat in OFF_TOPIC_PATTERNS)
+
+
 def _format_context_summary(idea_context: dict) -> str:
     """Format structured facts into a compact, token-efficient string."""
     items = [f"{k}: {v}" for k, v in idea_context.items() if v]
@@ -27,8 +46,8 @@ def _format_context_summary(idea_context: dict) -> str:
 
 def supervisor_chat(state: dict, user_message: str) -> dict:
     """
-    Runs one turn of the discovery conversation using compact structured context
-    and deterministic progression checks to minimize Gemini API calls and token count.
+    Runs one turn of the discovery conversation using compact structured context,
+    strict topic validation, and deterministic progression checks.
     """
     conversation = state.get("conversation", [])
     idea_context = {**DEFAULT_IDEA_CONTEXT, **state.get("idea_context", {})}
@@ -37,8 +56,24 @@ def supervisor_chat(state: dict, user_message: str) -> dict:
     clean_msg = user_message.strip()
     conversation.append({"role": "user", "content": clean_msg})
 
-    # Fast deterministic checks for readiness
+    # Fast pattern match check for common off-topic requests (e.g. "buil me a website")
+    if _is_off_topic_query(clean_msg):
+        print(f"[SUPERVISOR] Fast pattern match flagged off-topic input: '{clean_msg}'")
+        conversation.append({"role": "assistant", "content": OUT_OF_SCOPE_MESSAGE})
+        initial_query = state.get("user_query") or (conversation[0]["content"] if len(conversation) > 0 else clean_msg)
+        return {
+            "conversation": conversation,
+            "idea_context": idea_context,
+            "questions_asked": questions_asked,
+            "ready_for_analysis": False,
+            "reply": OUT_OF_SCOPE_MESSAGE,
+            "choices": state.get("choices", []),
+            "user_query": initial_query,
+        }
+
     lower_msg = clean_msg.lower()
+
+    # Fast deterministic checks for readiness
     explicit_trigger = any(
         kw in lower_msg
         for kw in ["start validation", "analyze now", "ready for analysis", "run analysis", "validate idea", "ready to validate"]
@@ -63,12 +98,12 @@ def supervisor_chat(state: dict, user_message: str) -> dict:
             "user_query": compiled_query,
         }
 
-    # Compact prompt: pass only the structured state + recent message (not raw historical transcripts)
+    # Compact prompt: pass only the structured state + recent message with topic validation instructions
     context_summary = _format_context_summary(idea_context)
     
     prompt = f"""
 You are the Lead Validation Analyst for VentureIQ (a top YC-level startup advisor).
-Conduct a discovery conversation to refine the founder's idea before multi-agent validation.
+Conduct a discovery conversation strictly focused on startup due diligence and pitch validation.
 
 Current Known Context:
 {context_summary}
@@ -78,8 +113,21 @@ Latest Founder Response:
 
 Questions Asked So Far: {questions_asked}/{MAX_QUESTIONS}
 
-Instructions:
-1. Extract new facts from the founder's response into `extracted_facts` (e.g. {{"target_customer": "B2B SMBs", "problem": "high churn"}}).
+STEP 1: STRICT TOPIC VALIDATION
+Determine if the Latest Founder Response is relevant to startup due diligence, pitch validation, or the startup idea being evaluated.
+- RELEVANT (is_off_topic = false):
+  * Direct answers or follow-up details about the startup idea (problem, target customer, solution, pricing, market, competitors, technology stack for the startup, GTM strategy, etc.).
+  * Relevant follow-up questions from the founder about their startup, customers, competitors, business model, market sizing, or pitch validation.
+  * Similar startup-related questions.
+- OUT OF SCOPE / UNRELATED (is_off_topic = true):
+  * Unrelated service requests (e.g. "build me a website", "write code for me", "create an app for me", "design a logo for me").
+  * General knowledge trivia, math problems, jokes, coding assignments, or arbitrary chat completely unrelated to startup due diligence or the startup idea.
+
+IF OUT OF SCOPE (is_off_topic = true):
+Set "is_off_topic": true, "ready_for_analysis": false, "message": "{OUT_OF_SCOPE_MESSAGE}", "choices": [].
+
+IF RELEVANT (is_off_topic = false):
+1. Extract new facts from the response into `extracted_facts` (e.g. {{"target_customer": "B2B SMBs", "problem": "high churn"}}).
 2. Evaluate if we have clear signals for: core problem, target user, solution, and monetization.
 3. If ready: set `ready_for_analysis`: true, `message`: "VentureIQ has collected sufficient context to validate this idea.", `choices`: [].
 4. If NOT ready: set `ready_for_analysis`: false, `message`: 1 concise strategic response + follow-up question (explain WHY it matters), and `choices`: 3-5 short strategic options (2-4 words each).
@@ -89,6 +137,7 @@ Rules:
 - NO questions about already known facts.
 - Return ONLY valid JSON:
 {{
+  "is_off_topic": false,
   "extracted_facts": {{"key": "value"}},
   "ready_for_analysis": false,
   "message": "...",
@@ -98,6 +147,28 @@ Rules:
 
     raw_response = invoke_gemini(prompt, temperature=0.3, phase="discovery")
     parsed = parse_json_response(raw_response, default={})
+
+    # Topic validation check from LLM response or deterministic helper
+    is_off_topic = _is_off_topic_query(clean_msg)
+    if parsed:
+        if parsed.get("is_off_topic") is True:
+            is_off_topic = True
+        elif "outside the scope" in str(parsed.get("message")).lower():
+            is_off_topic = True
+
+    if is_off_topic:
+        reply = OUT_OF_SCOPE_MESSAGE
+        conversation.append({"role": "assistant", "content": reply})
+        initial_query = state.get("user_query") or (conversation[0]["content"] if len(conversation) > 0 else clean_msg)
+        return {
+            "conversation": conversation,
+            "idea_context": idea_context,
+            "questions_asked": questions_asked,
+            "ready_for_analysis": False,
+            "reply": reply,
+            "choices": state.get("choices", []),
+            "user_query": initial_query,
+        }
 
     if not parsed or not parsed.get("message"):
         # Deterministic fallback logic if LLM is unavailable or malformed

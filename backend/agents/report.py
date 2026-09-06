@@ -12,7 +12,11 @@ def report_agent(state):
     if overall is not None:
         scores = {**scores, "overall": overall}
 
+    retrieved_context = state.get("retrieved_context", "")
+
     sections = []
+    if retrieved_context:
+        sections.append(f"RETRIEVED KNOWLEDGE & EVIDENCE:\n{retrieved_context}")
     if state.get("market_analysis"):
         sections.append(f"MARKET ANALYSIS:\n{state['market_analysis']}")
     if state.get("competitor_analysis"):
@@ -31,19 +35,31 @@ def report_agent(state):
     combined = "\n\n".join(sections)
 
     prompt = f"""
-Write an executive summary for a startup validation report.
+Write an executive summary synthesis for a startup validation report.
 
 Startup idea:
 {state.get("user_query", "")}
 
-Overall score: {overall if overall is not None else "N/A"}/100
+Overall Validation Score: {overall if overall is not None else "N/A"}/100
 
-Analysis sections:
+Combined Analysis & Evidence:
 {combined}
 
-Write 150-220 words of plain prose (no headers, no bullet lists): open with the overall verdict,
-name the single strongest signal and single biggest concern, and close with one concrete next step
-the founder should take this week.
+Instructions:
+Synthesize the findings explaining WHY VentureIQ reached its conclusion. Use the following structured outline:
+- VERDICT (1 sentence overall verdict)
+- Market & Customer Strength (1-2 sentences)
+- Competitive Moat & Positioning (1-2 sentences)
+- Business Viability & Revenue Model (1-2 sentences)
+- Major Risks & Execution Exposure (1-2 sentences)
+- Supporting Evidence & Assumptions (Highlight key evidence vs assumptions)
+- Recommended Validation Steps (1-2 next actions for the founder)
+
+Rules:
+- Do not fabricate numerical market statistics.
+- Clearly ground conclusions on retrieved evidence and agent evaluations.
+
+Keep the summary clear, high-rigor, and professional.
 """
 
     response = invoke_gemini(prompt, phase="validation:report")
