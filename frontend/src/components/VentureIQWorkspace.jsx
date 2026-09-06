@@ -27,7 +27,7 @@ import {
   X,
 } from 'lucide-react'
 import IntelligenceCore from './IntelligenceCore.jsx'
-import { chatWithVentureIQ, analyzeStartup } from '../services/api.js'
+import { chatWithVentureIQ, analyzeStartup, API_URL } from '../services/api.js'
 
 const AGENTS = [
   { key: 'supervisor', name: 'Supervisor', detail: 'Determines required intelligence' },
@@ -540,7 +540,7 @@ function InvestorReadinessCards({ scores }) {
 }
 
 function SettingsModal({ open, onClose, showToast }) {
-  const [apiUrl, setApiUrl] = useState('http://127.0.0.1:8000')
+  const [apiUrl, setApiUrl] = useState(API_URL)
   const [autoScroll, setAutoScroll] = useState(true)
 
   if (!open) return null
@@ -1113,7 +1113,7 @@ ${result.risk_analysis || 'N/A'}
                   <button onClick={sessionId ? startAnalysis : () => sendMessage(ideaRef.current)}>
                     <RefreshCw size={15} /> Retry
                   </button>
-                  <button className="secondary" onClick={() => window.open('http://127.0.0.1:8000', '_blank')}>
+                  <button className="secondary" onClick={() => window.open(API_URL, '_blank')}>
                     Check Connection <ArrowUpRight size={15} />
                   </button>
                 </div>

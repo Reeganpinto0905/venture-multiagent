@@ -1,9 +1,13 @@
 import axios from 'axios'
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000'
+export const API_URL = (
+  import.meta.env.VITE_API_URL ||
+  import.meta.env.VITE_API_BASE_URL ||
+  'http://127.0.0.1:8000'
+).replace(/\/$/, '')
 
 const api = axios.create({
-  baseURL: BASE_URL,
+  baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -23,7 +27,7 @@ export async function chatWithVentureIQ(sessionId, message) {
       throw new Error('The request timed out. Please try again.')
     }
     if (!error.response) {
-      throw new Error('Unable to connect to the VentureIQ backend server at ' + BASE_URL)
+      throw new Error('Unable to connect to the VentureIQ backend server at ' + API_URL)
     }
     const status = error.response.status
     const detail = error.response.data?.detail
@@ -50,7 +54,7 @@ export async function analyzeStartup(query, sessionId) {
       throw new Error('Validation analysis timed out. Please try again.')
     }
     if (!error.response) {
-      throw new Error('Unable to connect to the VentureIQ backend server at ' + BASE_URL)
+      throw new Error('Unable to connect to the VentureIQ backend server at ' + API_URL)
     }
     const status = error.response.status
     const detail = error.response.data?.detail
