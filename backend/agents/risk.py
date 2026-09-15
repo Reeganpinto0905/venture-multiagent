@@ -7,24 +7,30 @@ load_dotenv()
 def risk_agent(state):
     user_query = state.get("user_query", "")
     retrieved_context = state.get("retrieved_context", "")
+    profile = state.get("startup_profile", {})
 
+    profile_summary = "\n".join(f"- {k}: {v}" for k, v in profile.items() if v)
     evidence_block = f"\nRetrieved Knowledge / Evidence:\n{retrieved_context}\n" if retrieved_context else "\nRetrieved Knowledge / Evidence: None provided.\n"
 
     prompt = f"""
 Startup Idea & Context:
 {user_query}
+
+Extracted Startup Profile:
+{profile_summary or "None provided."}
 {evidence_block}
-Identify top risks (market, execution, regulatory, financial, competitive).
-Provide 1-2 concise bullet points per applicable category (keep total under 180 words).
+Identify top startup risks and mitigation strategies.
 
-RAG & Evidence Rules:
-- Distinguish empirical risks supported by retrieved evidence vs speculative execution risks.
-- Do not invent non-existent regulatory policies or fake statistics.
-- If evidence is insufficient, explicitly state the assumption.
+Provide 1-2 concise bullet points per category:
+• **Execution Risk**: Operational bottlenecks, driver/courier reliability, dorm security access.
+• **Regulatory & Campus Policy**: University commercial solicitation rules, health inspections, vehicle restrictions.
+• **Seasonal & Financial Risk**: Revenue drops during summer/winter breaks, order density volatility.
+• **Competitive Retaliation**: Incumbent aggregators cutting local fees or exclusivity deals with campus vendors.
 
-Rate overall risk exposure 0-100 (100 = very LOW risk / safe, 0 = very HIGH risk).
+Rules: Ground in realistic startup dynamics (under 180 words). Do not output raw scrape strings.
+Rate overall risk defensibility 0-100 (100 = very LOW risk / highly safe, 0 = very HIGH risk).
 
-Return ONLY valid JSON:
+Return ONLY valid JSON format:
 {{"analysis": "...", "score": 50}}
 """
 

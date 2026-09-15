@@ -1,5 +1,6 @@
 import hashlib
 import threading
+import time
 import uuid
 from typing import Dict, Any, Set
 
@@ -35,15 +36,36 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# In-memory session store & request deduplication locks
+# In-memory session store & request deduplication locks with timestamp expiration
 SESSIONS: Dict[str, Dict[str, Any]] = {}
-IN_FLIGHT_REQUESTS: Set[str] = set()
+IN_FLIGHT_REQUESTS: Dict[str, float] = {}
 IN_FLIGHT_LOCK = threading.Lock()
+LOCK_TTL_SECONDS = 60.0
+
+
+def _acquire_lock(req_key: str) -> bool:
+    now = time.time()
+    with IN_FLIGHT_LOCK:
+        # Clean expired locks
+        expired = [k for k, ts in IN_FLIGHT_REQUESTS.items() if now - ts > LOCK_TTL_SECONDS]
+        for k in expired:
+            del IN_FLIGHT_REQUESTS[k]
+
+        if req_key in IN_FLIGHT_REQUESTS:
+            return False
+        IN_FLIGHT_REQUESTS[req_key] = now
+        return True
+
+
+def _release_lock(req_key: str):
+    with IN_FLIGHT_LOCK:
+        IN_FLIGHT_REQUESTS.pop(req_key, None)
 
 
 class ChatRequest(BaseModel):
     message: str
     session_id: str | None = None
+    startup_profile: Dict[str, Any] | None = None
 
 
 class AnalyzeRequest(BaseModel):
@@ -51,6 +73,7 @@ class AnalyzeRequest(BaseModel):
     user_query: str | None = None
     startup_idea: str | None = None
     query: str | None = None
+    startup_profile: Dict[str, Any] | None = None
 
 
 @app.get("/")
@@ -85,31 +108,44 @@ def chat(data: ChatRequest):
     session_id = data.session_id or str(uuid.uuid4())
     req_key = f"chat:{session_id}:{hashlib.sha256(clean_msg.encode('utf-8')).hexdigest()}"
 
-    with IN_FLIGHT_LOCK:
-        if req_key in IN_FLIGHT_REQUESTS:
-            print(f"[DEDUPLICATE] Suppressing duplicate concurrent /chat request for session {session_id}")
-            existing_state = SESSIONS.get(session_id, {})
-            return {
-                "session_id": session_id,
-                "reply": existing_state.get("last_reply", "Processing previous turn..."),
-                "choices": existing_state.get("choices", []),
-                "ready_for_analysis": existing_state.get("ready_for_analysis", False),
-                "idea_context": existing_state.get("idea_context", {}),
-            }
-        IN_FLIGHT_REQUESTS.add(req_key)
+    if not _acquire_lock(req_key):
+        print(f"[DEDUPLICATE] Suppressing duplicate concurrent /chat request for session {session_id}")
+        existing_state = SESSIONS.get(session_id, {})
+        return {
+            "session_id": session_id,
+            "reply": existing_state.get("last_reply", "Processing previous turn..."),
+            "choices": existing_state.get("choices", []),
+            "ready_for_analysis": existing_state.get("ready_for_analysis", False),
+            "idea_context": existing_state.get("idea_context", {}),
+            "startup_profile": existing_state.get("startup_profile", {}),
+            "mode": existing_state.get("mode", "conversational"),
+            "telemetry": get_gemini_stats(),
+        }
 
     try:
+        start_t = time.time()
         state = SESSIONS.get(session_id, {})
+        if data.startup_profile:
+            state["startup_profile"] = {**state.get("startup_profile", {}), **data.startup_profile}
+
         result = supervisor_chat(state, clean_msg)
+        elapsed_ms = int((time.time() - start_t) * 1000)
 
         SESSIONS[session_id] = {
             "user_query": result["user_query"],
             "conversation": result["conversation"],
             "idea_context": result["idea_context"],
+            "startup_profile": result.get("startup_profile", {}),
             "questions_asked": result["questions_asked"],
             "ready_for_analysis": result["ready_for_analysis"],
             "last_reply": result["reply"],
             "choices": result["choices"],
+            "mode": result.get("mode", "conversational"),
+        }
+
+        telemetry = {
+            **get_gemini_stats(),
+            "execution_time_ms": elapsed_ms,
         }
 
         return {
@@ -118,6 +154,9 @@ def chat(data: ChatRequest):
             "choices": result["choices"],
             "ready_for_analysis": result["ready_for_analysis"],
             "idea_context": result["idea_context"],
+            "startup_profile": result.get("startup_profile", {}),
+            "mode": result.get("mode", "conversational"),
+            "telemetry": telemetry,
         }
 
     except HTTPException:
@@ -128,8 +167,7 @@ def chat(data: ChatRequest):
         print("==================================\n")
         raise HTTPException(status_code=502, detail="The conversational supervisor is temporarily unavailable.")
     finally:
-        with IN_FLIGHT_LOCK:
-            IN_FLIGHT_REQUESTS.discard(req_key)
+        _release_lock(req_key)
 
 
 @app.post("/analyze")
@@ -143,6 +181,9 @@ def analyze(data: AnalyzeRequest):
     if session_id and session_id in SESSIONS:
         initial_state = dict(SESSIONS[session_id])
 
+    if data.startup_profile:
+        initial_state["startup_profile"] = {**initial_state.get("startup_profile", {}), **data.startup_profile}
+
     user_query = (
         data.startup_idea
         or data.query
@@ -155,15 +196,20 @@ def analyze(data: AnalyzeRequest):
 
     req_key = f"analyze:{session_id or 'direct'}:{hashlib.sha256(user_query.encode('utf-8')).hexdigest()}"
 
-    with IN_FLIGHT_LOCK:
-        if req_key in IN_FLIGHT_REQUESTS:
-            print(f"[DEDUPLICATE] Suppressing duplicate concurrent /analyze request for query")
-            raise HTTPException(status_code=429, detail="Analysis is already in progress for this idea.")
-        IN_FLIGHT_REQUESTS.add(req_key)
+    if not _acquire_lock(req_key):
+        print(f"[DEDUPLICATE] Suppressing duplicate concurrent /analyze request for query")
+        raise HTTPException(status_code=429, detail="Analysis is already in progress for this idea.")
 
     try:
+        start_t = time.time()
         initial_state["user_query"] = user_query
         result = graph.invoke(initial_state)
+        elapsed_ms = int((time.time() - start_t) * 1000)
+
+        telemetry = {
+            **get_gemini_stats(),
+            "execution_time_ms": elapsed_ms,
+        }
 
         return {
             "tasks": result.get("tasks", []),
@@ -173,7 +219,10 @@ def analyze(data: AnalyzeRequest):
             "risk_analysis": result.get("risk_analysis", ""),
             "scores": result.get("scores", {}),
             "summary": result.get("summary", ""),
-            "retrieved_context": result.get("retrieved_context", "")
+            "retrieved_context": result.get("retrieved_context", ""),
+            "startup_profile": result.get("startup_profile", {}),
+            "mode": result.get("mode", "validation"),
+            "telemetry": telemetry,
         }
 
     except HTTPException:
@@ -187,5 +236,5 @@ def analyze(data: AnalyzeRequest):
             detail="The validation pipeline is temporarily unavailable. Please try again.",
         )
     finally:
-        with IN_FLIGHT_LOCK:
-            IN_FLIGHT_REQUESTS.discard(req_key)
+        _release_lock(req_key)
+

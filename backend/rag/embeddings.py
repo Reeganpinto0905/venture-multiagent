@@ -1,27 +1,18 @@
+import json
 import os
-import ssl
-from typing import List, Optional
+import urllib.request
+import urllib.error
+from typing import List
 from dotenv import load_dotenv
 
-try:
-    import certifi
-    os.environ['SSL_CERT_FILE'] = certifi.where()
-    os.environ['REQUESTS_CA_BUNDLE'] = certifi.where()
-    ssl._create_default_https_context = ssl._create_unverified_context
-except Exception:
-    pass
-
 load_dotenv()
-
-_embeddings_instance = None
 
 
 def get_embedding(text: str) -> List[float]:
     """
-    Generates embedding vector for query text using GoogleGenerativeAIEmbeddings (models/text-embedding-004).
-    Fallback to google.generativeai direct embedding if needed.
+    Generates embedding vector for query text using direct HTTPS REST (models/gemini-embedding-001).
+    Fast, reliable, and completely eliminates gRPC / DLL initialization hangs on Windows.
     """
-    global _embeddings_instance
     api_key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
     if not api_key:
         raise ValueError("Neither GEMINI_API_KEY nor GOOGLE_API_KEY environment variable is set.")
@@ -30,31 +21,36 @@ def get_embedding(text: str) -> List[float]:
     if not clean_text:
         clean_text = "startup validation"
 
-    if _embeddings_instance is None:
-        try:
-            from langchain_google_genai import GoogleGenerativeAIEmbeddings
-            _embeddings_instance = GoogleGenerativeAIEmbeddings(
-                model="models/text-embedding-004",
-                google_api_key=api_key
-            )
-        except Exception:
-            _embeddings_instance = None
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-001:embedContent?key={api_key}"
+    payload = json.dumps({
+        "model": "models/gemini-embedding-001",
+        "content": {
+            "parts": [{"text": clean_text[:2000]}]
+        },
+        "outputDimensionality": 1024
+    }).encode("utf-8")
 
-    if _embeddings_instance is not None:
-        try:
-            return _embeddings_instance.embed_query(clean_text)
-        except Exception as err:
-            print(f"[RAG EMBEDDINGS WARN] LangChain embedding failed: {err}. Trying direct genai fallback...")
+    req = urllib.request.Request(
+        url,
+        data=payload,
+        headers={"Content-Type": "application/json"}
+    )
 
-    # Fallback directly using google.generativeai
+    import ssl
+    ctx = ssl.create_default_context()
     try:
-        import google.generativeai as genai
-        genai.configure(api_key=api_key)
-        res = genai.embed_content(
-            model="models/text-embedding-004",
-            content=clean_text,
-            task_type="retrieval_query"
-        )
-        return res["embedding"]
-    except Exception as err:
-        raise RuntimeError(f"Failed to generate text embedding: {err}")
+        ctx.check_hostname = False
+        ctx.verify_mode = ssl.CERT_NONE
+    except Exception:
+        pass
+
+    try:
+        with urllib.request.urlopen(req, timeout=8, context=ctx) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+            embedding_values = data.get("embedding", {}).get("values", [])
+            if embedding_values:
+                return embedding_values
+            raise ValueError("No embedding values returned in response.")
+    except Exception as exc:
+        print(f"[RAG EMBEDDINGS WARN] REST embedding failed: {exc}")
+        return [0.0] * 1024

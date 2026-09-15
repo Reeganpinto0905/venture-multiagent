@@ -182,6 +182,14 @@ export default function IntelligenceCore({ phase = 'idle', className = '' }) {
         camera={{ position: [0, 0, 4.6], fov: 40 }}
         gl={{ alpha: true, antialias: true, powerPreference: 'high-performance' }}
         dpr={[1, 2]}
+        onCreated={({ gl }) => {
+          const domElement = gl.domElement
+          const handleContextLost = (e) => {
+            e.preventDefault()
+            console.warn('[IntelligenceCore] WebGL Context Lost - restoring gracefully.')
+          }
+          domElement.addEventListener('webglcontextlost', handleContextLost, false)
+        }}
       >
         <Core phase={phase} />
       </Canvas>

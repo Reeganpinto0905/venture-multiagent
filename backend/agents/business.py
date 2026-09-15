@@ -1,59 +1,50 @@
+from dotenv import load_dotenv
+from agents.llm_utils import invoke_gemini, parse_json_response
+
+load_dotenv()
+
+
 def business_agent(state):
-
-    idea = state.get("user_query", "").lower()
-    context = state.get("idea_context", {})
+    user_query = state.get("user_query", "")
     retrieved_context = state.get("retrieved_context", "")
-    context_text = " ".join(str(v) for v in context.values()).lower()
-    combined = f"{idea} {context_text} {retrieved_context.lower()}"
+    profile = state.get("startup_profile", {})
 
-    score = 0
-    signals = []
+    profile_summary = "\n".join(f"- {k}: {v}" for k, v in profile.items() if v)
+    evidence_block = f"\nRetrieved Knowledge / Evidence:\n{retrieved_context}\n" if retrieved_context else ""
 
-    checks = [
-        ("ai", 2, "AI-driven differentiation"),
-        ("platform", 2, "platform / network-effect model"),
-        ("subscription", 2, "recurring subscription revenue"),
-        ("health", 2, "high-value healthcare vertical"),
-        ("education", 2, "resilient education vertical"),
-        ("fintech", 2, "regulated but high-margin fintech vertical"),
-        ("marketplace", 1, "two-sided marketplace dynamics"),
-        ("b2b", 1, "B2B model (typically higher willingness to pay)"),
-    ]
+    prompt = f"""
+Startup Idea & User Query:
+{user_query}
 
-    for keyword, weight, label in checks:
-        if keyword in combined:
-            score += weight
-            signals.append(label)
+Extracted Startup Profile:
+{profile_summary or "None provided."}
+{evidence_block}
+Conduct an executive business viability and unit economics analysis.
 
-    score = min(score, 10)
+Structure clearly with bold headers:
+1. **Revenue Streams**: Primary pricing model (e.g. 15-20% commission fee, delivery fee) and secondary revenue (e.g. monthly campus pass, vendor ads).
+2. **Unit Economics & Margins**: Estimated gross margins, CAC vs LTV expectations, and operational leverage from delivery density.
+3. **Scalability & GTM Friction**: Key distribution bottlenecks (e.g. dorm access, seasonal breaks, partner lock-in).
+4. **Financial Hypotheses to Test**: 2-3 critical assumptions regarding order frequency, batch efficiency, and retention.
 
-    if score >= 7:
-        verdict = "Excellent Business Potential"
-    elif score >= 5:
-        verdict = "Good Business Potential"
-    elif score >= 3:
-        verdict = "Average Business Potential"
-    else:
-        verdict = "Needs Improvement"
+Rules: Keep analysis punchy, structured, and under 250 words. Do not output raw citations or fake exact statistics.
+Rate overall business model viability 0-100 (100 = highly viable/scalable).
 
-    signal_lines = "\n".join(f"• {s}" for s in signals) or "• No strong monetization signals detected yet"
+Return ONLY valid JSON format:
+{{"analysis": "...", "score": 75}}
+"""
 
-    analysis = f"""Business Score: {score}/10
-Verdict: {verdict}
+    raw_response = invoke_gemini(prompt, temperature=0.3, phase="validation:business")
+    parsed = parse_json_response(raw_response, default={})
 
-Signals detected:
-{signal_lines}
+    analysis = parsed.get("analysis") or raw_response or "Business analysis unavailable."
+    score = parsed.get("score")
+    score = score if isinstance(score, (int, float)) else 60
 
-Still worth validating:
-• Revenue model
-• Target customers
-• Pricing
-• Scalability
-• Market demand"""
-
-    scores = {**state.get("scores", {}), "business": score * 10}
+    scores = {**state.get("scores", {}), "business": int(score)}
 
     return {
         "business_analysis": analysis,
         "scores": scores,
     }
+

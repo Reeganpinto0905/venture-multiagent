@@ -14,11 +14,12 @@ const api = axios.create({
   timeout: 120000, // 120s timeout for deep multi-agent validation
 })
 
-export async function chatWithVentureIQ(sessionId, message) {
+export async function chatWithVentureIQ(sessionId, message, startupProfile = null) {
   try {
     const response = await api.post('/chat', {
       session_id: sessionId,
       message,
+      startup_profile: startupProfile,
     })
     return response.data
   } catch (error) {
@@ -41,11 +42,12 @@ export async function chatWithVentureIQ(sessionId, message) {
   }
 }
 
-export async function analyzeStartup(query, sessionId) {
+export async function analyzeStartup(query, sessionId, startupProfile = null) {
   try {
     const response = await api.post('/analyze', {
       startup_idea: query,
       session_id: sessionId,
+      startup_profile: startupProfile,
     })
     return response.data
   } catch (error) {
