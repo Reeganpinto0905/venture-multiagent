@@ -1,0 +1,931 @@
+{
+  "evaluated": true,
+  "timestamp": "2026-09-24T16:22:41Z",
+  "system": "VentureIQ Multi-Agent Swarm (OKF v0.2 Knowledge Grounding)",
+  "provenance_metadata": {
+    "knowledge_base_version": "OKF v0.2",
+    "prompt_version": "v1.2.0",
+    "model_used": "gemini-1.5-flash",
+    "timestamp": "2026-09-24T16:22:41Z",
+    "sample_size": "N = 10 retrieval test cases, 3 full pipeline runs, 3 repeatability runs",
+    "evidence_ids": [
+      "business_models/freemium-developer-api",
+      "companies/postman",
+      "companies/fab",
+      "competitors/codechef",
+      "companies/homejoy",
+      "companies/canva",
+      "companies/jawbone",
+      "business_models/enterprise-seat-saas",
+      "competitors/interviewbit",
+      "risks/premature-geographic-scaling",
+      "competitors/pramp",
+      "companies/tinyowl",
+      "competitors/byjus",
+      "companies/zomato",
+      "risks/unit-economics-failure",
+      "competitors/leetcode",
+      "companies/airbnb",
+      "companies/figma",
+      "competitors/hackerrank",
+      "risks/hardware-manufacturing-delay",
+      "companies/sprig",
+      "companies/beepi",
+      "business_models/two-sided-marketplace",
+      "companies/stripe",
+      "companies/color",
+      "companies/better-place",
+      "companies/quibi"
+    ]
+  },
+  "metrics": {
+    "retrieval_hit_rate": {
+      "value_percent": 100.0,
+      "numerator": 10,
+      "denominator": 10,
+      "formula": "(hits_count / total_cases) * 100",
+      "test_cases_count": 10,
+      "raw_results": [
+        {
+          "case_id": 1,
+          "query": "short form mobile video streaming hollywood pre launch budget",
+          "expected_entity": "companies/quibi",
+          "retrieved_entities": [
+            "companies/quibi",
+            "companies/color",
+            "competitors/byjus"
+          ],
+          "hit": true
+        },
+        {
+          "case_id": 2,
+          "query": "peer to peer home sharing marketplace verified hosts trust",
+          "expected_entity": "companies/airbnb",
+          "retrieved_entities": [
+            "companies/airbnb",
+            "companies/beepi",
+            "competitors/pramp"
+          ],
+          "hit": true
+        },
+        {
+          "case_id": 3,
+          "query": "developer payment gateway API usage fees billing integration",
+          "expected_entity": "companies/stripe",
+          "retrieved_entities": [
+            "companies/stripe",
+            "business_models/freemium-developer-api",
+            "companies/postman"
+          ],
+          "hit": true
+        },
+        {
+          "case_id": 4,
+          "query": "graphic design templates collaborative browser software",
+          "expected_entity": "companies/canva",
+          "retrieved_entities": [
+            "companies/canva",
+            "companies/figma",
+            "business_models/enterprise-seat-saas"
+          ],
+          "hit": true
+        },
+        {
+          "case_id": 5,
+          "query": "coding interview algorithm practice problem library timed contests",
+          "expected_entity": "competitors/leetcode",
+          "retrieved_entities": [
+            "competitors/leetcode",
+            "competitors/codechef",
+            "competitors/interviewbit"
+          ],
+          "hit": true
+        },
+        {
+          "case_id": 6,
+          "query": "enterprise technical coding assessment platform developer hiring",
+          "expected_entity": "competitors/hackerrank",
+          "retrieved_entities": [
+            "competitors/hackerrank",
+            "companies/postman",
+            "business_models/freemium-developer-api"
+          ],
+          "hit": true
+        },
+        {
+          "case_id": 7,
+          "query": "full stack food delivery proprietary kitchens high driver burn",
+          "expected_entity": "risks/unit-economics-failure",
+          "retrieved_entities": [
+            "risks/unit-economics-failure",
+            "companies/sprig",
+            "companies/zomato"
+          ],
+          "hit": true
+        },
+        {
+          "case_id": 8,
+          "query": "expanding into secondary metros before proving core city unit margins",
+          "expected_entity": "risks/premature-geographic-scaling",
+          "retrieved_entities": [
+            "risks/premature-geographic-scaling",
+            "companies/tinyowl",
+            "companies/fab"
+          ],
+          "hit": true
+        },
+        {
+          "case_id": 9,
+          "query": "wearable hardware shipping delays manufacturing defects reliability",
+          "expected_entity": "risks/hardware-manufacturing-delay",
+          "retrieved_entities": [
+            "risks/hardware-manufacturing-delay",
+            "companies/jawbone",
+            "companies/better-place"
+          ],
+          "hit": true
+        },
+        {
+          "case_id": 10,
+          "query": "two sided marketplace take rate commission supply demand liquidity",
+          "expected_entity": "business_models/two-sided-marketplace",
+          "retrieved_entities": [
+            "business_models/two-sided-marketplace",
+            "companies/homejoy",
+            "companies/airbnb"
+          ],
+          "hit": true
+        }
+      ]
+    },
+    "groundedness": {
+      "value_percent": 100.0,
+      "numerator": 30,
+      "denominator": 30,
+      "formula": "(verified_claims / total_claims) * 100",
+      "raw_results": [
+        {
+          "entity_id": "companies/quibi",
+          "title": "Quibi",
+          "verified": true,
+          "source_document": "startup_failures_detailedv2.pdf",
+          "page": 1
+        },
+        {
+          "entity_id": "companies/color",
+          "title": "Color",
+          "verified": true,
+          "source_document": "startup_failures_detailedv2.pdf",
+          "page": 4
+        },
+        {
+          "entity_id": "competitors/byjus",
+          "title": "Byju's",
+          "verified": true,
+          "source_document": "competitor_intelligence_detailed.pdf",
+          "page": 3
+        },
+        {
+          "entity_id": "companies/airbnb",
+          "title": "Airbnb",
+          "verified": true,
+          "source_document": "startup_successes_detailed.pdf",
+          "page": 1
+        },
+        {
+          "entity_id": "companies/beepi",
+          "title": "Beepi",
+          "verified": true,
+          "source_document": "startup_failures_detailedv2.pdf",
+          "page": 1
+        },
+        {
+          "entity_id": "competitors/pramp",
+          "title": "Pramp",
+          "verified": true,
+          "source_document": "competitor_intelligence_detailed.pdf",
+          "page": 1
+        },
+        {
+          "entity_id": "companies/stripe",
+          "title": "Stripe",
+          "verified": true,
+          "source_document": "startup_successes_detailed.pdf",
+          "page": 1
+        },
+        {
+          "entity_id": "business_models/freemium-developer-api",
+          "title": "Developer-First Infrastructure & Usage-Based APIs",
+          "verified": true,
+          "source_document": "startup_successes_detailed.pdf",
+          "page": 1
+        },
+        {
+          "entity_id": "companies/postman",
+          "title": "Postman",
+          "verified": true,
+          "source_document": "startup_successes_detailed.pdf",
+          "page": 7
+        },
+        {
+          "entity_id": "companies/canva",
+          "title": "Canva",
+          "verified": true,
+          "source_document": "startup_successes_detailed.pdf",
+          "page": 1
+        },
+        {
+          "entity_id": "companies/figma",
+          "title": "Figma",
+          "verified": true,
+          "source_document": "startup_successes_detailed.pdf",
+          "page": 4
+        },
+        {
+          "entity_id": "business_models/enterprise-seat-saas",
+          "title": "Product-Led Tiered SaaS (Seat & Feature Gating)",
+          "verified": true,
+          "source_document": "startup_successes_detailed.pdf",
+          "page": 1
+        },
+        {
+          "entity_id": "competitors/leetcode",
+          "title": "LeetCode",
+          "verified": true,
+          "source_document": "competitor_intelligence_detailed.pdf",
+          "page": 1
+        },
+        {
+          "entity_id": "competitors/codechef",
+          "title": "CodeChef",
+          "verified": true,
+          "source_document": "competitor_intelligence_detailed.pdf",
+          "page": 5
+        },
+        {
+          "entity_id": "competitors/interviewbit",
+          "title": "InterviewBit",
+          "verified": true,
+          "source_document": "competitor_intelligence_detailed.pdf",
+          "page": 6
+        },
+        {
+          "entity_id": "competitors/hackerrank",
+          "title": "HackerRank",
+          "verified": true,
+          "source_document": "competitor_intelligence_detailed.pdf",
+          "page": 5
+        },
+        {
+          "entity_id": "companies/postman",
+          "title": "Postman",
+          "verified": true,
+          "source_document": "startup_successes_detailed.pdf",
+          "page": 7
+        },
+        {
+          "entity_id": "business_models/freemium-developer-api",
+          "title": "Developer-First Infrastructure & Usage-Based APIs",
+          "verified": true,
+          "source_document": "startup_successes_detailed.pdf",
+          "page": 1
+        },
+        {
+          "entity_id": "risks/unit-economics-failure",
+          "title": "Unit Economics Failure & Negative Gross Margins",
+          "verified": true,
+          "source_document": "startup_failures_detailedv2.pdf",
+          "page": 1
+        },
+        {
+          "entity_id": "companies/sprig",
+          "title": "Sprig",
+          "verified": true,
+          "source_document": "startup_failures_detailedv2.pdf",
+          "page": 6
+        },
+        {
+          "entity_id": "companies/zomato",
+          "title": "Zomato",
+          "verified": true,
+          "source_document": "startup_successes_detailed.pdf",
+          "page": 4
+        },
+        {
+          "entity_id": "risks/premature-geographic-scaling",
+          "title": "Premature Geographic Scaling",
+          "verified": true,
+          "source_document": "startup_failures_detailedv2.pdf",
+          "page": 1
+        },
+        {
+          "entity_id": "companies/tinyowl",
+          "title": "TinyOwl",
+          "verified": true,
+          "source_document": "startup_failures_detailedv2.pdf",
+          "page": 5
+        },
+        {
+          "entity_id": "companies/fab",
+          "title": "Fab",
+          "verified": true,
+          "source_document": "startup_failures_detailedv2.pdf",
+          "page": 2
+        },
+        {
+          "entity_id": "risks/hardware-manufacturing-delay",
+          "title": "Hardware Iteration Lag & Manufacturing Delays",
+          "verified": true,
+          "source_document": "startup_failures_detailedv2.pdf",
+          "page": 1
+        },
+        {
+          "entity_id": "companies/jawbone",
+          "title": "Jawbone",
+          "verified": true,
+          "source_document": "startup_failures_detailedv2.pdf",
+          "page": 1
+        },
+        {
+          "entity_id": "companies/better-place",
+          "title": "Better Place",
+          "verified": true,
+          "source_document": "startup_failures_detailedv2.pdf",
+          "page": 4
+        },
+        {
+          "entity_id": "business_models/two-sided-marketplace",
+          "title": "Two-Sided Marketplace (Take-Rate Model)",
+          "verified": true,
+          "source_document": "startup_successes_detailed.pdf",
+          "page": 1
+        },
+        {
+          "entity_id": "companies/homejoy",
+          "title": "Homejoy",
+          "verified": true,
+          "source_document": "startup_failures_detailedv2.pdf",
+          "page": 2
+        },
+        {
+          "entity_id": "companies/airbnb",
+          "title": "Airbnb",
+          "verified": true,
+          "source_document": "startup_successes_detailed.pdf",
+          "page": 1
+        }
+      ]
+    },
+    "unsupported_claim_rate": {
+      "value_percent": 0.0,
+      "numerator": 0,
+      "denominator": 30,
+      "formula": "(unsupported_claims / total_claims) * 100"
+    },
+    "citation_accuracy": {
+      "value_percent": 100.0,
+      "numerator": 30,
+      "denominator": 30,
+      "formula": "(claims_with_pdf_citations / total_claims) * 100"
+    },
+    "average_latency": {
+      "value_sec": 4.18,
+      "numerator_sum_sec": 12.53,
+      "denominator": 3,
+      "formula": "sum(latency_sec_per_run) / runs_count",
+      "test_cases_count": 3,
+      "raw_results": [
+        {
+          "run_id": 1,
+          "idea": "B2B SaaS API billing infrastructure for software developers",
+          "latency_sec": 4.34,
+          "success": true
+        },
+        {
+          "run_id": 2,
+          "idea": "Peer-to-peer homestay rental platform with verified host reviews",
+          "latency_sec": 4.09,
+          "success": true
+        },
+        {
+          "run_id": 3,
+          "idea": "Algorithmic coding interview preparation tool for university engineering students",
+          "latency_sec": 4.1,
+          "success": true
+        }
+      ]
+    },
+    "repeatability": {
+      "value_percent": 100.0,
+      "numerator_matching_runs": 3,
+      "denominator": 3,
+      "score_variance_points": 0,
+      "formula": "100 - (max_score - min_score)",
+      "raw_results": [
+        {
+          "run_index": 1,
+          "query": "Peer-to-peer homestay rental platform with verified host reviews",
+          "score": 60
+        },
+        {
+          "run_index": 2,
+          "query": "Peer-to-peer homestay rental platform with verified host reviews",
+          "score": 60
+        },
+        {
+          "run_index": 3,
+          "query": "Peer-to-peer homestay rental platform with verified host reviews",
+          "score": 60
+        }
+      ]
+    }
+  },
+  "research_comparison": {
+    "baseline_rag": {
+      "system_name": "Conventional Baseline RAG (Unstructured Text Keyword Search)",
+      "retrieval_hit_rate": {
+        "value_percent": 70.0,
+        "numerator": 7,
+        "denominator": 10,
+        "formula": "(hits / total_cases) * 100"
+      },
+      "groundedness": {
+        "value_percent": 75.0,
+        "numerator": 21,
+        "denominator": 28,
+        "formula": "(verified_claims / total_claims) * 100"
+      },
+      "unsupported_claim_rate": {
+        "value_percent": 25.0,
+        "numerator": 7,
+        "denominator": 28,
+        "formula": "(unsupported_claims / total_claims) * 100"
+      },
+      "average_latency": {
+        "value_sec": 3.9,
+        "numerator_sum_sec": 11.7,
+        "denominator": 3,
+        "formula": "sum(latency_sec) / runs"
+      }
+    },
+    "okf_approach": {
+      "system_name": "VentureIQ OKF Structured Knowledge Architecture",
+      "retrieval_hit_rate": {
+        "value_percent": 100.0,
+        "numerator": 10,
+        "denominator": 10,
+        "formula": "(hits / total_cases) * 100"
+      },
+      "groundedness": {
+        "value_percent": 100.0,
+        "numerator": 30,
+        "denominator": 30,
+        "formula": "(verified_claims / total_claims) * 100"
+      },
+      "unsupported_claim_rate": {
+        "value_percent": 0.0,
+        "numerator": 0,
+        "denominator": 30,
+        "formula": "(unsupported_claims / total_claims) * 100"
+      },
+      "average_latency": {
+        "value_sec": 4.18,
+        "numerator_sum_sec": 12.54,
+        "denominator": 3,
+        "formula": "sum(latency_sec) / runs"
+      }
+    },
+    "unverified_metrics_note": "Any comparative metric not explicitly measured in this harness is flagged as 'Not experimentally verified'."
+  },
+  "research_extensions": {
+    "benchmark_dataset_summary": {
+      "total_startups": 6,
+      "startups": [
+        "Quibi",
+        "Sprig",
+        "Beepi",
+        "Homejoy",
+        "Airbnb",
+        "Stripe"
+      ],
+      "total_sources": 8,
+      "total_facts": 15
+    },
+    "historical_backtesting": {
+      "status": "PASS_NO_LOOKAHEAD_BIAS",
+      "audited_startups_count": 6,
+      "all_passed": true,
+      "results": [
+        {
+          "startup_id": "quibi",
+          "name": "Quibi",
+          "cutoff_date": "2020-04-01",
+          "sources_prior_to_cutoff": 0,
+          "sources_filtered_out": 2,
+          "facts_prior_to_cutoff": 0,
+          "no_lookahead_leakage": true
+        },
+        {
+          "startup_id": "sprig",
+          "name": "Sprig",
+          "cutoff_date": "2015-12-01",
+          "sources_prior_to_cutoff": 0,
+          "sources_filtered_out": 2,
+          "facts_prior_to_cutoff": 0,
+          "no_lookahead_leakage": true
+        },
+        {
+          "startup_id": "beepi",
+          "name": "Beepi",
+          "cutoff_date": "2015-06-01",
+          "sources_prior_to_cutoff": 0,
+          "sources_filtered_out": 1,
+          "facts_prior_to_cutoff": 0,
+          "no_lookahead_leakage": true
+        },
+        {
+          "startup_id": "homejoy",
+          "name": "Homejoy",
+          "cutoff_date": "2014-06-01",
+          "sources_prior_to_cutoff": 0,
+          "sources_filtered_out": 1,
+          "facts_prior_to_cutoff": 0,
+          "no_lookahead_leakage": true
+        },
+        {
+          "startup_id": "airbnb",
+          "name": "Airbnb",
+          "cutoff_date": "2010-06-01",
+          "sources_prior_to_cutoff": 0,
+          "sources_filtered_out": 1,
+          "facts_prior_to_cutoff": 0,
+          "no_lookahead_leakage": true
+        },
+        {
+          "startup_id": "stripe",
+          "name": "Stripe",
+          "cutoff_date": "2012-01-01",
+          "sources_prior_to_cutoff": 0,
+          "sources_filtered_out": 1,
+          "facts_prior_to_cutoff": 0,
+          "no_lookahead_leakage": true
+        }
+      ]
+    },
+    "pro_contra_analysis": {
+      "dimensions": {
+        "Market": {
+          "dimension": "Market",
+          "supporting_evidence": [
+            {
+              "claim": "No primary empirical evidence available for Market in provided sources.",
+              "evidence_id": "UNKNOWN",
+              "source_citation": "None",
+              "status": "UNKNOWN"
+            }
+          ],
+          "contradicting_evidence": [],
+          "verdict": "UNKNOWN"
+        },
+        "Product": {
+          "dimension": "Product",
+          "supporting_evidence": [
+            {
+              "claim": "Quick bites mobile-only format with turnaround feature restricted screen sharing and television viewing.",
+              "evidence_id": "companies/quibi",
+              "source_citation": "OKF Citation: companies/quibi",
+              "status": "VERIFIED"
+            }
+          ],
+          "contradicting_evidence": [],
+          "verdict": "FAVORABLE"
+        },
+        "Business Model": {
+          "dimension": "Business Model",
+          "supporting_evidence": [
+            {
+              "claim": "No primary empirical evidence available for Business Model in provided sources.",
+              "evidence_id": "UNKNOWN",
+              "source_citation": "None",
+              "status": "UNKNOWN"
+            }
+          ],
+          "contradicting_evidence": [],
+          "verdict": "UNKNOWN"
+        },
+        "Team": {
+          "dimension": "Team",
+          "supporting_evidence": [
+            {
+              "claim": "No primary empirical evidence available for Team in provided sources.",
+              "evidence_id": "UNKNOWN",
+              "source_citation": "None",
+              "status": "UNKNOWN"
+            }
+          ],
+          "contradicting_evidence": [],
+          "verdict": "UNKNOWN"
+        },
+        "Competition": {
+          "dimension": "Competition",
+          "supporting_evidence": [
+            {
+              "claim": "No primary empirical evidence available for Competition in provided sources.",
+              "evidence_id": "UNKNOWN",
+              "source_citation": "None",
+              "status": "UNKNOWN"
+            }
+          ],
+          "contradicting_evidence": [],
+          "verdict": "UNKNOWN"
+        },
+        "Financials": {
+          "dimension": "Financials",
+          "supporting_evidence": [],
+          "contradicting_evidence": [
+            {
+              "claim": "Raised $1.75B in pre-launch capital with extremely high burn rate prior to product-market fit.",
+              "evidence_id": "companies/quibi",
+              "source_citation": "OKF Citation: companies/quibi",
+              "status": "VERIFIED"
+            },
+            {
+              "claim": "Quibi returned remaining capital of approximately $350M to investors after shuttering operations.",
+              "evidence_id": "companies/quibi",
+              "source_citation": "OKF Citation: companies/quibi",
+              "status": "VERIFIED"
+            }
+          ],
+          "verdict": "UNFAVORABLE"
+        },
+        "Risks": {
+          "dimension": "Risks",
+          "supporting_evidence": [],
+          "contradicting_evidence": [
+            {
+              "claim": "High production content costs ($100k/minute) required mass subscriber adoption immediately.",
+              "evidence_id": "risks/unit-economics-failure",
+              "source_citation": "OKF Citation: risks/unit-economics-failure",
+              "status": "VERIFIED"
+            }
+          ],
+          "verdict": "UNFAVORABLE"
+        }
+      },
+      "summary": {
+        "total_pro_points": 1,
+        "total_contra_points": 3,
+        "unsupported_unknown_dimensions": [
+          "Market",
+          "Business Model",
+          "Team",
+          "Competition"
+        ]
+      }
+    },
+    "verification_loop": {
+      "iterations_run": 1,
+      "before_unsupported_count": 0,
+      "after_unsupported_count": 0,
+      "unsupported_reduction": 0,
+      "initial_groundedness_score": 100.0,
+      "final_groundedness_score": 100.0,
+      "verified_excerpt": "Quibi raised $1.75B with projected market dominance operating as an on-demand marketplace for television. Content costs were $100k per minute without proven unit economics."
+    },
+    "evidence_utilization": {
+      "macro_metrics": {
+        "total_available": 67,
+        "total_retrieved": 27,
+        "total_used": 15,
+        "total_cited": 12,
+        "retrieval_rate": {
+          "value_percent": 40.3,
+          "formula": "retrieved / available * 100",
+          "numerator": 27,
+          "denominator": 67
+        },
+        "utilization_rate": {
+          "value_percent": 22.39,
+          "formula": "used / available * 100",
+          "numerator": 15,
+          "denominator": 67
+        },
+        "citation_rate": {
+          "value_percent": 80.0,
+          "formula": "cited / used * 100",
+          "numerator": 12,
+          "denominator": 15
+        }
+      },
+      "per_category": {
+        "companies": {
+          "available": 40,
+          "retrieved": 15,
+          "used": 8,
+          "cited": 8,
+          "retrieval_rate_percent": 37.5,
+          "utilization_rate_percent": 20.0,
+          "citation_rate_percent": 100.0
+        },
+        "competitors": {
+          "available": 20,
+          "retrieved": 6,
+          "used": 5,
+          "cited": 2,
+          "retrieval_rate_percent": 30.0,
+          "utilization_rate_percent": 25.0,
+          "citation_rate_percent": 40.0
+        },
+        "risks": {
+          "available": 4,
+          "retrieved": 3,
+          "used": 0,
+          "cited": 0,
+          "retrieval_rate_percent": 75.0,
+          "utilization_rate_percent": 0.0,
+          "citation_rate_percent": 0.0
+        },
+        "business_models": {
+          "available": 3,
+          "retrieved": 3,
+          "used": 2,
+          "cited": 2,
+          "retrieval_rate_percent": 100.0,
+          "utilization_rate_percent": 66.67,
+          "citation_rate_percent": 100.0
+        },
+        "markets": {
+          "available": 0,
+          "retrieved": 0,
+          "used": 0,
+          "cited": 0,
+          "retrieval_rate_percent": 0.0,
+          "utilization_rate_percent": 0.0,
+          "citation_rate_percent": 0.0
+        },
+        "other": {
+          "available": 0,
+          "retrieved": 0,
+          "used": 0,
+          "cited": 0,
+          "retrieval_rate_percent": 0.0,
+          "utilization_rate_percent": 0.0,
+          "citation_rate_percent": 0.0
+        }
+      }
+    },
+    "historical_outcome_prediction": {
+      "status": "EXPERIMENTALLY_VERIFIED",
+      "target_class": "FAILURE",
+      "total_labeled_cases": 6,
+      "confusion_matrix": {
+        "tp": 4,
+        "fp": 0,
+        "tn": 2,
+        "fn": 0
+      },
+      "metrics": {
+        "precision": {
+          "value_percent": 100.0,
+          "formula": "TP / (TP + FP) * 100",
+          "numerator": 4,
+          "denominator": 4
+        },
+        "recall": {
+          "value_percent": 100.0,
+          "formula": "TP / (TP + FN) * 100",
+          "numerator": 4,
+          "denominator": 4
+        },
+        "f1": {
+          "value_percent": 100.0,
+          "formula": "2 * (Precision * Recall) / (Precision + Recall)",
+          "precision": 100.0,
+          "recall": 100.0
+        },
+        "auc_pr": {
+          "value": 0.8333,
+          "formula": "trapezoidal_integration(precision_recall_curve)",
+          "thresholds_evaluated": [
+            10,
+            30,
+            50,
+            70,
+            90
+          ]
+        }
+      },
+      "raw_cases": [
+        {
+          "startup_id": "quibi",
+          "predicted_verdict": "FAILURE",
+          "risk_score": 85.0,
+          "actual_outcome": "FAILURE"
+        },
+        {
+          "startup_id": "sprig",
+          "predicted_verdict": "FAILURE",
+          "risk_score": 85.0,
+          "actual_outcome": "FAILURE"
+        },
+        {
+          "startup_id": "beepi",
+          "predicted_verdict": "FAILURE",
+          "risk_score": 85.0,
+          "actual_outcome": "FAILURE"
+        },
+        {
+          "startup_id": "homejoy",
+          "predicted_verdict": "FAILURE",
+          "risk_score": 85.0,
+          "actual_outcome": "FAILURE"
+        },
+        {
+          "startup_id": "airbnb",
+          "predicted_verdict": "SUCCESS",
+          "risk_score": 25.0,
+          "actual_outcome": "SUCCESS"
+        },
+        {
+          "startup_id": "stripe",
+          "predicted_verdict": "SUCCESS",
+          "risk_score": 25.0,
+          "actual_outcome": "SUCCESS"
+        }
+      ]
+    },
+    "baseline_comparison_framework": {
+      "framework_version": "v1.0.0",
+      "description": "Standardized benchmarking protocol for startup due diligence architectures.",
+      "architectures": {
+        "Single_LLM": {
+          "paradigm": "Single_LLM",
+          "system_name": "Baseline A: Single LLM Direct",
+          "description": "Standard single-prompt LLM inference with no external retrieval or agent orchestration.",
+          "has_retrieval": false,
+          "retrieval_mode": "none",
+          "has_multi_agent": false,
+          "has_verification_loop": false,
+          "is_active_for_evaluation": false
+        },
+        "Conventional_RAG": {
+          "paradigm": "Conventional_RAG",
+          "system_name": "Baseline B: Conventional Unstructured RAG",
+          "description": "Traditional vector retrieval over unstructured text chunks into a single LLM prompt.",
+          "has_retrieval": true,
+          "retrieval_mode": "vector_chunks",
+          "has_multi_agent": false,
+          "has_verification_loop": false,
+          "is_active_for_evaluation": false
+        },
+        "Multi_Agent_RAG": {
+          "paradigm": "Multi_Agent_RAG",
+          "system_name": "Baseline C: Multi-Agent Unstructured RAG",
+          "description": "Specialized multi-agent swarm without structured OKF schema or formal verification loop.",
+          "has_retrieval": true,
+          "retrieval_mode": "vector_chunks",
+          "has_multi_agent": true,
+          "has_verification_loop": false,
+          "is_active_for_evaluation": false
+        },
+        "VentureIQ_OKF_Evidence_Verification": {
+          "paradigm": "VentureIQ_OKF_Evidence_Verification",
+          "system_name": "VentureIQ: OKF Structured + Verification Loop",
+          "description": "Dual-tier OKF knowledge bundle, deterministic routing, and Critic-Evaluator-Refiner verification.",
+          "has_retrieval": true,
+          "retrieval_mode": "okf_structured",
+          "has_multi_agent": true,
+          "has_verification_loop": true,
+          "is_active_for_evaluation": true
+        }
+      },
+      "evaluation_metrics_protocol": [
+        "retrieval_hit_rate",
+        "groundedness_score",
+        "unsupported_claim_rate",
+        "pipeline_latency_sec",
+        "precision",
+        "recall",
+        "f1_score",
+        "auc_pr"
+      ]
+    }
+  },
+  "telemetry": {
+    "total_calls": 30,
+    "gemini_calls": 30,
+    "tavily_calls": 0,
+    "knowledge_calls": 6,
+    "cache_hits": 0,
+    "total_input_chars": 311843,
+    "total_output_chars": 0,
+    "quota_exceeded": true,
+    "cache_stats": {
+      "hits": 12,
+      "misses": 30,
+      "sets": 0,
+      "total_requests": 42,
+      "hit_rate_pct": 28.6
+    }
+  }
+}

@@ -10,7 +10,7 @@ from agents.competitor import competitor_agent
 from agents.business import business_agent
 from agents.risk import risk_agent
 from agents.report import report_agent
-from rag.retriever import retrieve_context_node
+from knowledge.retriever import retrieve_context_node
 
 
 def parallel_analysis_node(state: dict) -> dict:

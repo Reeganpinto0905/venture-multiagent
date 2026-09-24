@@ -1,3 +1,9 @@
+"""
+VentureIQ Market Agent.
+Evaluates TAM/SAM/SOM market sizing, customer segments, demand drivers, and price elasticity.
+Strictly distinguishes between user-provided startup evidence, external precedents, and general benchmarks.
+"""
+
 import re
 from dotenv import load_dotenv
 from tools.search_tool import search_web
@@ -8,37 +14,47 @@ load_dotenv()
 
 def market_agent(state):
     idea = state.get("user_query", "")
-    retrieved_context = state.get("retrieved_context", "")
+    retrieved_context = state.get("market_context") or state.get("retrieved_context", "")
+    profile = state.get("startup_profile", {})
 
     clean_idea = idea.split("\n")[0].strip() if idea else "Startup Concept"
+    profile_summary = "\n".join(f"- {k}: {v}" for k, v in profile.items() if v)
 
     search_query = f"{clean_idea} market size TAM SAM SOM growth trends demand drivers"
     raw_results = search_web(search_query)
 
-    evidence_block = f"\nRetrieved Knowledge Base Evidence:\n{retrieved_context}\n" if retrieved_context else "\nRetrieved Knowledge Base Evidence: None provided.\n"
+    evidence_block = f"\nRetrieved Knowledge Base Evidence (OKF v0.2):\n{retrieved_context}\n" if retrieved_context else "\nRetrieved Knowledge Base Evidence: None provided.\n"
 
     prompt = f"""
-You are the Lead Market Analyst for VentureIQ (McKinsey-level startup diligence).
-Conduct an executive, highly attractive, data-grounded market analysis for:
+You are the Lead Market Analyst at VentureIQ (McKinsey/Sequoia level diligence).
+Conduct an executive, evidence-grounded market analysis for:
 "{idea}"
+
+Submitted Startup Context & Profile:
+{profile_summary or "No extra profile parameters supplied by founder."}
 
 {evidence_block}
 
 Live Web Research Findings:
 {raw_results}
 
-Write an attractive, structured market assessment covering:
-1. **Target Market & Core Customer Segment**: Primary user persona, demographics, and pain frequency.
-2. **Demand Drivers & Market Tailwinds**: Key forces driving adoption (technology, lifestyle, economic).
-3. **TAM / SAM / SOM Market Sizing**: Opportunity sizing in USD or unit volume (cite verified figures or state explicit estimation logic).
-4. **Willingness to Pay & Price Elasticity**: Pricing expectations, average order value, or contract size.
-5. **Key Entry Barriers & Regulatory Factors**: Local/campus regulations, operational friction, or defensibility gates.
-6. **Critical Assumptions to Validate**: The top 2-3 market hypotheses to test immediately.
+CRITICAL RULES:
+1. STRICTLY SEPARATE:
+   - **STARTUP EVIDENCE**: Facts explicitly stated in the submitted pitch/profile.
+   - **EXTERNAL PRECEDENT**: Historical case studies from retrieved knowledge (e.g. Airbnb, Canva, Stripe). Mark clearly as external!
+   - **GENERAL INDUSTRY BENCHMARK**: Standard industry metrics (e.g. general TAM estimates).
+   - **MISSING EVIDENCE / UNKNOWN**: Explicitly state any market data not provided in the user input.
+2. NEVER claim an external benchmark or precedent is a property of the user's startup.
+3. NEVER invent fake TAM/SAM/SOM figures or customer claims for the user's startup.
+4. If TAM/SAM/SOM or pricing is not specified in the pitch, explicitly write "Not provided in submitted evidence. Estimated general benchmark: ..."
 
-Format Rules:
-- Output clean, professional markdown with bold labels for key points (e.g. `• **Demand Drivers:** ...`).
-- Do NOT output raw web scrape text (like 'Title:', 'Content:', or raw URLs).
-- Rate market opportunity 0-100 (100 = massive, fast-growing, underserved).
+Structure with clean bold headers:
+• **Target Customer & Persona**: Segment identified in startup pitch (or state if missing).
+• **Demand Drivers & Market Tailwinds**: Forces driving customer adoption for this specific product.
+• **Market Sizing (TAM / SAM / SOM)**: User figures if provided, or explicit general industry estimation logic.
+• **Willingness to Pay & Price Elasticity**: Founder's pricing model or industry comparable.
+• **Market Entry Barriers & Regulatory Friction**: Specific friction points for this sector.
+• **Evidence Gaps & Market Assumptions**: Top hypotheses needing validation.
 
 Return ONLY valid JSON format:
 {{"analysis": "...", "score": 75}}
@@ -57,14 +73,13 @@ Return ONLY valid JSON format:
         analysis = cleaned
 
     if not analysis:
-        analysis = f"""### **Market Opportunity Overview**
-The market for {clean_idea} represents a high-density, convenience-oriented opportunity driven by mobile-first user behaviors and rapid digital payment adoption.
-
-• **Target Segment:** High-density college campus students and faculty requiring time-sensitive dining and delivery options.
-• **Demand Drivers:** Irregular academic schedules, high smartphone penetration, and late-night study routines drive strong demand.
-• **Market Sizing (TAM/SAM/SOM):** The global online food delivery market exceeds $320B, with campus micro-markets representing high-frequency, concentrated order density.
-• **Willingness to Pay:** High elasticity for low-friction delivery fees, especially during peak study hours and inclement weather.
-• **Barriers & Friction:** Dorm access restrictions and seasonal academic breaks require agile delivery mechanisms."""
+        # Domain-neutral objective fallback (No hardcoded food delivery!)
+        analysis = f"""• **Target Customer & Persona:** Target user segment based on submitted pitch for {clean_idea}. Specific demographic breakdown not fully specified in input.
+• **Demand Drivers:** Technology adoption and operational efficiency demand.
+• **Market Sizing (TAM / SAM / SOM):** Specific TAM/SAM metrics not provided in submitted input. General industry market size requires validation.
+• **Willingness to Pay:** Monetization model to be confirmed via customer interviews.
+• **Barriers & Friction:** Incumbent adoption and go-to-market distribution gates.
+• **Evidence Gaps & Market Assumptions:** Validate primary target persona and willingness to pay."""
 
     score = parsed.get("score") if isinstance(parsed, dict) else None
     score = score if isinstance(score, (int, float)) else 70
@@ -75,4 +90,3 @@ The market for {clean_idea} represents a high-density, convenience-oriented oppo
         "market_analysis": analysis,
         "scores": scores,
     }
-

@@ -36,10 +36,13 @@ def search_web(query: str, max_results: int = 5) -> str:
         return "Web search is temporarily unavailable; continuing with known information."
 
     results = []
-    for item in response.get("results", []):
+    for item in response.get("results", [])[:3]:
+        snippet = str(item.get("content", "")).strip()
+        if len(snippet) > 250:
+            snippet = snippet[:250].rsplit(" ", 1)[0] + "..."
         results.append(
             f"• Title: {item.get('title', 'Untitled result')}\n"
-            f"  Content: {item.get('content', '')}\n"
+            f"  Content: {snippet}\n"
             f"  URL: {item.get('url', '')}"
         )
 

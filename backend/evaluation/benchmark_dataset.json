@@ -1,0 +1,270 @@
+{
+  "version": "1.0.0",
+  "description": "Reproducible public-startup benchmark pilot dataset for historical backtesting and outcome prediction.",
+  "startups": [
+    {
+      "startup_id": "quibi",
+      "name": "Quibi",
+      "industry": "Mobile Streaming Video",
+      "historical_cutoff": "2020-04-01",
+      "sources": [
+        {
+          "document": "startup_failures_detailedv2.pdf",
+          "publication_date": "2020-03-15",
+          "url_or_citation": "SEC / Public Press Reports (Pre-launch 2020)",
+          "source_type": "public_filing_or_press"
+        },
+        {
+          "document": "quibi_post_mortem_wsj.pdf",
+          "publication_date": "2020-10-22",
+          "url_or_citation": "Wall Street Journal Post-Mortem (Post-Cutoff)",
+          "source_type": "public_filing_or_press"
+        }
+      ],
+      "facts": [
+        {
+          "fact_id": "quibi_f1",
+          "category": "Financials",
+          "claim": "Raised $1.75B in pre-launch capital with extremely high burn rate prior to product-market fit.",
+          "evidence_id": "companies/quibi",
+          "publication_date": "2020-03-01",
+          "status": "VERIFIED"
+        },
+        {
+          "fact_id": "quibi_f2",
+          "category": "Product",
+          "claim": "Quick bites mobile-only format with turnaround feature restricted screen sharing and television viewing.",
+          "evidence_id": "companies/quibi",
+          "publication_date": "2020-03-15",
+          "status": "VERIFIED"
+        },
+        {
+          "fact_id": "quibi_f3",
+          "category": "Risks",
+          "claim": "High production content costs ($100k/minute) required mass subscriber adoption immediately.",
+          "evidence_id": "risks/unit-economics-failure",
+          "publication_date": "2020-03-20",
+          "status": "VERIFIED"
+        },
+        {
+          "fact_id": "quibi_f4",
+          "category": "Financials",
+          "claim": "Quibi returned remaining capital of approximately $350M to investors after shuttering operations.",
+          "evidence_id": "companies/quibi",
+          "publication_date": "2020-10-22",
+          "status": "VERIFIED"
+        }
+      ],
+      "later_outcome": {
+        "status": "FAILURE",
+        "outcome_date": "2020-12-01",
+        "summary": "Shut down operations 6 months post-launch after low paid conversion and unsustainable cost structure.",
+        "public_reference": "Quibi Official Announcement (Dec 2020)"
+      }
+    },
+    {
+      "startup_id": "sprig",
+      "name": "Sprig",
+      "industry": "On-Demand Food Delivery",
+      "historical_cutoff": "2015-12-01",
+      "sources": [
+        {
+          "document": "startup_failures_detailedv2.pdf",
+          "publication_date": "2015-11-10",
+          "url_or_citation": "TechCrunch Coverage of Sprig Series B",
+          "source_type": "public_filing_or_press"
+        },
+        {
+          "document": "sprig_closure_announcement.pdf",
+          "publication_date": "2017-05-26",
+          "url_or_citation": "CEO Closure Statement (Post-Cutoff)",
+          "source_type": "public_filing_or_press"
+        }
+      ],
+      "facts": [
+        {
+          "fact_id": "sprig_f1",
+          "category": "Business Model",
+          "claim": "Full-stack model owning commercial kitchens, chefs, and direct courier fleet.",
+          "evidence_id": "companies/sprig",
+          "publication_date": "2015-06-01",
+          "status": "VERIFIED"
+        },
+        {
+          "fact_id": "sprig_f2",
+          "category": "Financials",
+          "claim": "Reported losing over $6 per meal produced due to food waste and idle delivery drivers.",
+          "evidence_id": "risks/unit-economics-failure",
+          "publication_date": "2015-10-15",
+          "status": "VERIFIED"
+        },
+        {
+          "fact_id": "sprig_f3",
+          "category": "Team",
+          "claim": "Executive culinary team lacked experienced supply chain optimization specialists.",
+          "evidence_id": "companies/sprig",
+          "publication_date": "2015-11-01",
+          "status": "INFERENCE"
+        }
+      ],
+      "later_outcome": {
+        "status": "FAILURE",
+        "outcome_date": "2017-05-26",
+        "summary": "Shut down due to negative contribution margins inherent in full-stack food preparation.",
+        "public_reference": "TechCrunch / Bloomberg (May 2017)"
+      }
+    },
+    {
+      "startup_id": "beepi",
+      "name": "Beepi",
+      "industry": "Peer-to-Peer Used Car Marketplace",
+      "historical_cutoff": "2015-06-01",
+      "sources": [
+        {
+          "document": "startup_failures_detailedv2.pdf",
+          "publication_date": "2015-05-01",
+          "url_or_citation": "Wall Street Journal Used Car Startups",
+          "source_type": "public_filing_or_press"
+        }
+      ],
+      "facts": [
+        {
+          "fact_id": "beepi_f1",
+          "category": "Business Model",
+          "claim": "Guaranteed minimum sale price to sellers, absorbing unsold inventory risk onto balance sheet.",
+          "evidence_id": "companies/beepi",
+          "publication_date": "2015-04-10",
+          "status": "VERIFIED"
+        },
+        {
+          "fact_id": "beepi_f2",
+          "category": "Financials",
+          "claim": "High monthly burn rate of $7M+ driven by lavish executive perks and national expansion.",
+          "evidence_id": "risks/unit-economics-failure",
+          "publication_date": "2015-05-20",
+          "status": "VERIFIED"
+        }
+      ],
+      "later_outcome": {
+        "status": "FAILURE",
+        "outcome_date": "2017-02-01",
+        "summary": "Ran out of capital and entered assignment for benefit of creditors (ABC).",
+        "public_reference": "TechCrunch / WSJ (Feb 2017)"
+      }
+    },
+    {
+      "startup_id": "homejoy",
+      "name": "Homejoy",
+      "industry": "On-Demand Home Services",
+      "historical_cutoff": "2014-06-01",
+      "sources": [
+        {
+          "document": "startup_failures_detailedv2.pdf",
+          "publication_date": "2014-04-15",
+          "url_or_citation": "VentureBeat On-Demand Cleaning Profile",
+          "source_type": "public_filing_or_press"
+        }
+      ],
+      "facts": [
+        {
+          "fact_id": "homejoy_f1",
+          "category": "Business Model",
+          "claim": "$19 promotional first cleaning created platform disintermediation between clients and cleaners.",
+          "evidence_id": "companies/homejoy",
+          "publication_date": "2014-03-01",
+          "status": "VERIFIED"
+        },
+        {
+          "fact_id": "homejoy_f2",
+          "category": "Risks",
+          "claim": "Faced worker misclassification lawsuits while suffering <25% 60-day customer retention.",
+          "evidence_id": "risks/premature-geographic-scaling",
+          "publication_date": "2014-05-10",
+          "status": "VERIFIED"
+        }
+      ],
+      "later_outcome": {
+        "status": "FAILURE",
+        "outcome_date": "2015-07-31",
+        "summary": "Ceased operations amidst contractor misclassification lawsuits and weak customer retention.",
+        "public_reference": "Wired / Forbes (July 2015)"
+      }
+    },
+    {
+      "startup_id": "airbnb",
+      "name": "Airbnb",
+      "industry": "Peer-to-Peer Hospitality Marketplace",
+      "historical_cutoff": "2010-06-01",
+      "sources": [
+        {
+          "document": "startup_successes_detailed.pdf",
+          "publication_date": "2010-04-01",
+          "url_or_citation": "Y Combinator Case Study & TechCrunch 2010",
+          "source_type": "public_filing_or_press"
+        }
+      ],
+      "facts": [
+        {
+          "fact_id": "airbnb_f1",
+          "category": "Business Model",
+          "claim": "Two-sided marketplace taking 3% host fee and 6-12% guest booking fee with zero real estate assets.",
+          "evidence_id": "business_models/two-sided-marketplace",
+          "publication_date": "2010-02-15",
+          "status": "VERIFIED"
+        },
+        {
+          "fact_id": "airbnb_f2",
+          "category": "Product",
+          "claim": "Professional photography program and verified reviews unlocked peer trust.",
+          "evidence_id": "companies/airbnb",
+          "publication_date": "2010-05-12",
+          "status": "VERIFIED"
+        }
+      ],
+      "later_outcome": {
+        "status": "SUCCESS",
+        "outcome_date": "2020-12-10",
+        "summary": "Completed initial public offering (IPO) on NASDAQ (ABNB) reaching >$100B market valuation.",
+        "public_reference": "SEC Form S-1 / NASDAQ IPO"
+      }
+    },
+    {
+      "startup_id": "stripe",
+      "name": "Stripe",
+      "industry": "Developer Payment Infrastructure",
+      "historical_cutoff": "2012-01-01",
+      "sources": [
+        {
+          "document": "startup_successes_detailed.pdf",
+          "publication_date": "2011-10-01",
+          "url_or_citation": "TechCrunch Launch Coverage 2011",
+          "source_type": "public_filing_or_press"
+        }
+      ],
+      "facts": [
+        {
+          "fact_id": "stripe_f1",
+          "category": "Business Model",
+          "claim": "Usage-based 2.9% + 30 cents per transaction API model with self-serve developer onboarding.",
+          "evidence_id": "business_models/freemium-developer-api",
+          "publication_date": "2011-09-29",
+          "status": "VERIFIED"
+        },
+        {
+          "fact_id": "stripe_f2",
+          "category": "Product",
+          "claim": "7 lines of code to accept credit cards via client-side JavaScript without PCI burden.",
+          "evidence_id": "companies/stripe",
+          "publication_date": "2011-10-15",
+          "status": "VERIFIED"
+        }
+      ],
+      "later_outcome": {
+        "status": "SUCCESS",
+        "outcome_date": "2021-03-14",
+        "summary": "Scaled globally processing hundreds of billions in payment volume with high gross margins.",
+        "public_reference": "Public Press / Financial Disclosures"
+      }
+    }
+  ]
+}

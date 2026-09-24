@@ -5,8 +5,7 @@ import ssl
 # Ensure backend root is on sys.path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-# Disable Pinecone gRPC network calls & bypass local SSL verification for test environment
-os.environ["PINECONE_API_KEY"] = ""
+# Open Knowledge Format (OKF v0.2) test configuration
 os.environ["PYTHONHTTPSVERIFY"] = "0"
 os.environ["CURL_CA_BUNDLE"] = ""
 

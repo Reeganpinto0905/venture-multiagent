@@ -64,7 +64,7 @@ class CacheStore:
         expires_at = now + ttl
         serialized = json.dumps(value) if isinstance(value, (dict, list, bool, int, float)) else str(value)
 
-        for secret_env in ("GOOGLE_API_KEY", "GEMINI_API_KEY", "PINECONE_API_KEY", "TAVILY_API_KEY"):
+        for secret_env in ("GOOGLE_API_KEY", "GEMINI_API_KEY", "TAVILY_API_KEY"):
             val = os.getenv(secret_env)
             if val and len(val) > 8:
                 serialized = serialized.replace(val, "[REDACTED_SECRET]")

@@ -1,3 +1,9 @@
+"""
+VentureIQ Competitor Agent.
+Analyzes direct rivals, indirect substitutes, status-quo alternatives, and competitive whitespace.
+Strictly distinguishes between user-provided startup evidence, external precedents, and general benchmarks.
+"""
+
 import re
 from dotenv import load_dotenv
 from tools.search_tool import search_web
@@ -8,17 +14,17 @@ load_dotenv()
 
 def competitor_agent(state):
     user_query = state.get("user_query", "")
-    retrieved_context = state.get("retrieved_context", "")
+    retrieved_context = state.get("competitor_context") or state.get("retrieved_context", "")
 
     clean_idea = user_query.split("\n")[0].strip() if user_query else "Startup Concept"
 
     search_query = f"{clean_idea} top competitors direct indirect status quo pricing positioning strategy"
     raw_results = search_web(search_query)
 
-    evidence_block = f"\nRetrieved Knowledge Base Evidence:\n{retrieved_context}\n" if retrieved_context else "\nRetrieved Knowledge Base Evidence: None provided.\n"
+    evidence_block = f"\nRetrieved Knowledge Base Evidence (OKF v0.2):\n{retrieved_context}\n" if retrieved_context else "\nRetrieved Knowledge Base Evidence: None provided.\n"
 
     synth_prompt = f"""
-You are the Lead Competitor Strategy Analyst for VentureIQ (McKinsey-level startup diligence).
+You are the Lead Competitor Strategy Analyst for VentureIQ (McKinsey level due diligence).
 Analyze the competitive landscape for:
 "{user_query}"
 
@@ -27,18 +33,21 @@ Analyze the competitive landscape for:
 Live Web Research Findings:
 {raw_results}
 
-Provide an attractive, structured competitive diligence brief covering:
-1. **Direct Competitors**: Name actual companies, offering, target user, core advantage, and vulnerability.
-2. **Indirect Competitors**: Adjacent platforms, substitute technologies, and alternative services.
-3. **Status Quo Alternatives**: Manual workarounds, dining hall walking, group runs, or legacy habits.
-4. **Competitive Whitespace & Gap**: Unsolved customer pain points unaddressed by incumbents.
-5. **Strategic Blueprint to Win**: 2-3 actionable advantages (e.g. localized density, speed, zero surge pricing, direct partnerships).
-6. **Strategic Verdict**: Direct, honest verdict on defensibility and entry strategy.
+CRITICAL RULES:
+1. STRICTLY SEPARATE:
+   - **STARTUP EVIDENCE**: Features or claims explicitly stated in the submitted pitch.
+   - **EXTERNAL COMPETITORS / PRECEDENTS**: Real rival companies discovered via search or OKF benchmarks (e.g. LeetCode, HackerRank, Stripe). Clearly mark them as external!
+   - **MISSING COMPETITIVE DATA**: Explicitly state if competitor details are not in submitted pitch.
+2. NEVER present external competitor features or benchmarks as properties of the user's startup.
+3. NEVER invent fake competitor names. Use real companies from web research or state "To be identified".
 
-Format Rules:
-- Output clean, professional markdown with bold labels for key points (e.g. `• **Direct Competitors:** ...`).
-- Do NOT output raw web scrape text (like 'Title:', 'Content:', or raw URLs).
-- Rate competitive defensibility 0-100 (100 = massive moat, 0 = saturated red ocean).
+Structure with clean bold headers:
+• **Direct Competitors**: Actual rival companies, offerings, advantages, and vulnerabilities.
+• **Indirect Competitors & Substitutes**: Alternative software, platforms, or manual solutions.
+• **Status Quo Alternatives**: Current workarounds customers use today.
+• **Competitive Whitespace & Gap**: Unaddressed customer pain points where startup can win.
+• **Strategic Moat & Defensibility**: Moat durability (network effects, data flywheel, switching costs).
+• **Strategic Verdict**: Direct, objective verdict on competitive position.
 
 Return ONLY valid JSON format:
 {{"analysis": "...", "score": 65}}
@@ -57,15 +66,13 @@ Return ONLY valid JSON format:
         analysis = cleaned
 
     if not analysis:
-        analysis = f"""### **Competitive Moat & Landscape**
-The competitive environment for {clean_idea} spans national third-party aggregators, campus dining services, and legacy student habits.
-
-• **Direct Competitors:** National aggregators (DoorDash, UberEats, Grubhub) offering high vendor variety but burdened by expensive service fees ($4-$8/order) and difficulty navigating secured dorms.
-• **Indirect Competitors:** On-campus cafeteria dining plans, convenience retail, and quick-serve restaurants.
-• **Status Quo Alternatives:** Walking to nearby food trucks/dining halls, cooking in communal dorm kitchens, or peer food runs.
-• **Competitive Whitespace:** Dedicated dorm-drop batching with transparent flat student pricing and late-night delivery windows.
-• **Strategic Blueprint to Win:** Campus ambassador-led viral distribution, exclusive dining hall integrations, and high-frequency delivery batching.
-• **Strategic Verdict:** Strong hyper-local opportunity if last-mile dorm routing solves the friction national players ignore."""
+        # Domain-neutral objective fallback (No hardcoded food delivery!)
+        analysis = f"""• **Direct Competitors:** Established incumbents and specialized category players serving {clean_idea}.
+• **Indirect Competitors & Substitutes:** Internal manual tools, spreadsheet workflows, or broad legacy software suites.
+• **Status Quo Alternatives:** In-house manual processes or unautomated workflows.
+• **Competitive Whitespace:** Unserved niche requiring targeted execution and lower friction onboarding.
+• **Strategic Moat & Defensibility:** Defensibility hinges on speed of execution, proprietary data accumulation, and user switching costs.
+• **Strategic Verdict:** Viable market entry if product differentiates clearly from incumbent feature sets."""
 
     score = parsed.get("score") if isinstance(parsed, dict) else None
     score = score if isinstance(score, (int, float)) else 60
@@ -76,4 +83,3 @@ The competitive environment for {clean_idea} spans national third-party aggregat
         "competitor_analysis": analysis,
         "scores": scores,
     }
-

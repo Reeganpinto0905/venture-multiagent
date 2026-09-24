@@ -1,6 +1,6 @@
 from dotenv import load_dotenv
 from tools.search_tool import search_web
-from rag.retriever import retrieve_context
+from knowledge.retriever import retrieve_context
 from agents.llm_utils import invoke_gemini, parse_json_response
 
 load_dotenv()

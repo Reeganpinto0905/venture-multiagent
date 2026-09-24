@@ -1,0 +1,16 @@
+bundle_id: startup_diligence_bundle
+name: VentureIQ Startup Due Diligence Knowledge Bundle
+version: 0.2.0
+schema_version: '0.2'
+description: Official Open Knowledge Format (OKF v0.2) knowledge bundle containing
+  empirical startup failure post-mortems, success playbooks, competitor intelligence
+  profiles, risk factors, and business model benchmarks for VentureIQ automated due
+  diligence.
+author: VentureIQ Multi-Agent Ingestion Pipeline (Google Cloud OKF Spec)
+created_at: '2026-09-24'
+entity_count: 67
+categories:
+- business_models
+- companies
+- competitors
+- risks

@@ -5,21 +5,25 @@ import re
 import sys
 import time
 from typing import Dict, Any, Optional
+from dotenv import load_dotenv, find_dotenv
+
+# Ensure .env is reliably loaded whether executed from root or backend
+load_dotenv(find_dotenv(usecwd=True))
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from cache.cache_store import cache_store
 
 # Centralized Model Configuration & Resilient Fallback Cascade
-DEFAULT_MODEL = os.getenv("GEMINI_MODEL", "gemini-3.1-flash-lite-preview")
+DEFAULT_MODEL = os.getenv("GEMINI_MODEL", "gemini-1.5-flash")
 DISCOVERY_MODEL = os.getenv("GEMINI_DISCOVERY_MODEL", DEFAULT_MODEL)
 VALIDATION_MODEL = os.getenv("GEMINI_VALIDATION_MODEL", DEFAULT_MODEL)
 
 # Multi-model quota-resilient cascade
 MODEL_FALLBACK_ORDER = [
-    DEFAULT_MODEL,
-    "gemini-3.1-flash-lite-preview",
-    "gemini-flash-latest",
-    "gemini-2.5-flash",
+    "gemini-1.5-flash",
+    "gemini-2.0-flash",
+    "gemini-1.5-pro",
+    "gemini-2.0-flash-lite",
 ]
 
 # Usage Observability & Telemetry Counters
@@ -27,10 +31,15 @@ _STATS = {
     "total_calls": 0,
     "gemini_calls": 0,
     "tavily_calls": 0,
-    "pinecone_calls": 0,
+    "knowledge_calls": 0,
     "cache_hits": 0,
     "total_input_chars": 0,
     "total_output_chars": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "total_tokens": 0,
+    "api_measured_tokens": False,
+    "estimated_cost_usd": 0.0,
 }
 
 
@@ -39,10 +48,10 @@ def increment_telemetry(key: str, delta: int = 1):
         _STATS[key] += delta
 
 
-def _call_gemini_rest(model_name: str, prompt: str, temperature: float, api_key: str) -> Optional[str]:
+def _call_gemini_rest(model_name: str, prompt: str, temperature: float, api_key: str):
     """
     Direct HTTPS REST invocation of Gemini generateContent.
-    Bypasses gRPC channel setup issues on Windows and responds in 2-3 seconds.
+    Extracts text response and official usageMetadata (token counts).
     """
     import urllib.request
     import urllib.error
@@ -72,12 +81,14 @@ def _call_gemini_rest(model_name: str, prompt: str, temperature: float, api_key:
     try:
         with urllib.request.urlopen(req, timeout=14, context=ctx) as resp:
             data = json.loads(resp.read().decode("utf-8"))
+            usage = data.get("usageMetadata", {})
             candidates = data.get("candidates", [])
+            text = None
             if candidates:
                 parts = candidates[0].get("content", {}).get("parts", [])
                 if parts:
-                    return parts[0].get("text", "")
-            return None
+                    text = parts[0].get("text", "")
+            return text, usage
     except urllib.error.HTTPError as http_err:
         err_body = ""
         try:
@@ -133,17 +144,35 @@ def invoke_gemini(
     for candidate_model in candidates:
         try:
             # First attempt high-speed direct REST (2-3s, no gRPC hang)
-            content = _call_gemini_rest(candidate_model, prompt, temperature, api_key)
+            content, usage = _call_gemini_rest(candidate_model, prompt, temperature, api_key)
             if content:
                 _STATS["total_output_chars"] += len(content)
+
+                # Token count measurement from official API metadata where available
+                in_tokens = usage.get("promptTokenCount")
+                out_tokens = usage.get("candidatesTokenCount")
+                if in_tokens is not None and out_tokens is not None:
+                    _STATS["input_tokens"] += in_tokens
+                    _STATS["output_tokens"] += out_tokens
+                    _STATS["total_tokens"] += (in_tokens + out_tokens)
+                    _STATS["api_measured_tokens"] = True
+                    # Gemini 1.5 Flash official: $0.075 / 1M prompt, $0.30 / 1M output
+                    cost = (in_tokens * 0.000000075) + (out_tokens * 0.00000030)
+                    _STATS["estimated_cost_usd"] = round(_STATS["estimated_cost_usd"] + cost, 6)
+                else:
+                    est_in = len(prompt) // 4
+                    est_out = len(content) // 4
+                    _STATS["input_tokens"] += est_in
+                    _STATS["output_tokens"] += est_out
+                    _STATS["total_tokens"] += (est_in + est_out)
+
                 if use_cache:
                     cache_store.set(cache_key, content, ttl=86400)
 
-                est_in = len(prompt) // 4
-                est_out = len(content) // 4
                 print(
                     f"[GEMINI REST OK] phase: {phase} | model: {candidate_model} | "
-                    f"est_in: ~{est_in} | est_out: ~{est_out}"
+                    f"in_tok: {usage.get('promptTokenCount', len(prompt)//4)} | "
+                    f"out_tok: {usage.get('candidatesTokenCount', len(content)//4)}"
                 )
                 return content
 
