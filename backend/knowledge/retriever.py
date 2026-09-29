@@ -107,15 +107,51 @@ def retrieve_context(query: str, top_k: int = 5, intent: Optional[str] = None) -
                 ranked.append((e, score))
                 seen_ids.add(e.id)
 
-    entities = [e for e, _ in ranked[:top_k]]
-    formatted = format_okf_evidence(entities, max_items=top_k)
-    
-    if formatted:
-        print(f"[OKF RETRIEVER SUCCESS] Retrieved {len(entities)} structured OKF entities for query: '{clean_query[:40]}...'")
-    else:
-        print(f"[OKF RETRIEVER INFO] No OKF entities matched for query: '{clean_query[:40]}...'")
+    # Check if OKF evidence is sufficient:
+    # Requires score >= 3.0 AND matching at least 2 distinct terms for multi-word queries
+    import re
+    query_terms = [t for t in re.findall(r"\w+", clean_query.lower()) if len(t) > 2]
+    matched_terms = 0
+    if ranked and query_terms:
+        top_ent = ranked[0][0]
+        ent_text = (top_ent.title + " " + top_ent.description + " " + top_ent.body).lower()
+        matched_terms = sum(1 for t in query_terms if t in ent_text)
 
-    return formatted
+    has_sufficient_okf = (
+        len(ranked) > 0
+        and ranked[0][1] >= 3.0
+        and (matched_terms >= 2 or len(query_terms) <= 2)
+    )
+
+    if has_sufficient_okf:
+        entities = [e for e, _ in ranked[:top_k]]
+        formatted = format_okf_evidence(entities, max_items=top_k)
+        print(f"[OKF RETRIEVER SUCCESS] Retrieved {len(entities)} structured OKF entities for query: '{clean_query[:40]}...'")
+        return f"[OKF Primary Empirical Evidence | OKF v0.2]:\n{formatted}"
+
+    # 1. OKF Insufficient (Cold-Start) -> Tavily Fallback
+    print(f"[OKF COLD-START] Insufficient OKF evidence for '{clean_query[:40]}...'. Falling back to live web search...")
+    try:
+        from tools.search_tool import search_web
+        web_res = search_web(clean_query, max_results=top_k)
+    except Exception as exc:
+        print(f"[SEARCH FALLBACK ERROR] {exc}")
+        web_res = ""
+
+    if web_res and "UNKNOWN" not in web_res and len(web_res.strip()) > 30:
+        return f"[Live Web Evidence (OKF Cold-Start Fallback)]:\n{web_res}"
+
+    # 2. Tavily Failed or Insufficient -> Fall back to low-confidence OKF ONLY if score >= 1.0
+    if ranked and ranked[0][1] >= 1.0:
+        entities = [e for e, _ in ranked[:top_k]]
+        okf_fallback = format_okf_evidence(entities, max_items=top_k)
+        if okf_fallback:
+            print(f"[OKF RETRIEVER FALLBACK] Serving low-confidence historical OKF evidence after web failure.")
+            return f"[Historical OKF Knowledge Base (Web Search Unavailable)]:\n{okf_fallback}"
+
+    # 3. Neither OKF nor Web provided evidence -> UNKNOWN
+    print(f"[EVIDENCE EXHAUSTED] No sufficient empirical evidence from OKF or Live Web for '{clean_query[:40]}...'.")
+    return "UNKNOWN / Insufficient Evidence"
 
 
 def retrieve_context_node(state: dict) -> dict:

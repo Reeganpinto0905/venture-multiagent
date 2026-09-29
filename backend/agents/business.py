@@ -16,6 +16,14 @@ def business_agent(state):
     profile = state.get("startup_profile", {})
 
     profile_summary = "\n".join(f"- {k}: {v}" for k, v in profile.items() if v)
+    # Token optimization: skip expensive LLM invocation when evidence is completely absent
+    if "UNKNOWN / Insufficient Evidence" in retrieved_context and not user_query.strip():
+        print(f"[BUSINESS AGENT] Skipping LLM call: primary evidence is completely absent.")
+        return {
+            "business_analysis": f"• **Analysis Status:** UNKNOWN / Insufficient Evidence in primary OKF knowledge base for business model analysis.\n• **Recommendation:** Outline pricing tier structure and unit economics targets.",
+            "scores": {**state.get("scores", {}), "business": 50},
+        }
+
     evidence_block = f"\nRetrieved Knowledge Base Evidence (OKF v0.2):\n{retrieved_context}\n" if retrieved_context else "\nRetrieved Knowledge Base Evidence: None provided.\n"
 
     prompt = f"""

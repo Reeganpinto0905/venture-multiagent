@@ -23,6 +23,14 @@ def market_agent(state):
     search_query = f"{clean_idea} market size TAM SAM SOM growth trends demand drivers"
     raw_results = search_web(search_query)
 
+    # Token optimization: skip expensive LLM invocation when evidence is completely absent
+    if "UNKNOWN / Insufficient Evidence" in retrieved_context and (not raw_results or "UNKNOWN" in raw_results):
+        print(f"[MARKET AGENT] Skipping LLM call: primary evidence is completely absent.")
+        return {
+            "market_analysis": f"• **Analysis Status:** UNKNOWN / Insufficient Evidence in primary OKF knowledge base or live search for {clean_idea}.\n• **Recommendation:** Provide primary market metrics or customer segment data to validate this domain.",
+            "scores": {**state.get("scores", {}), "market": 50},
+        }
+
     evidence_block = f"\nRetrieved Knowledge Base Evidence (OKF v0.2):\n{retrieved_context}\n" if retrieved_context else "\nRetrieved Knowledge Base Evidence: None provided.\n"
 
     prompt = f"""

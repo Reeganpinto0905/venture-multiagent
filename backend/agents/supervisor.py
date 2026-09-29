@@ -232,6 +232,29 @@ Return ONLY valid JSON:
     elif not profile.get("differentiation"):
         profile["differentiation"] = clean_msg
 
+    # Token optimization: prevent re-requesting dimensions already extracted
+    core_profile_complete = bool(profile.get("problem") and profile.get("target_customer") and profile.get("business_model"))
+    if core_profile_complete:
+        print("[SUPERVISOR] Profile dimensions already established. Skipping discovery LLM call.")
+        reply_msg = f"Profile parameters are defined ({profile.get('target_customer')}, {profile.get('business_model')}). Ready to proceed with deep multi-agent validation."
+        conversation.append({"role": "assistant", "content": reply_msg})
+        compiled_query = state.get("user_query") or clean_msg
+        if profile:
+            details = _format_profile_summary(profile)
+            compiled_query = f"{compiled_query}\n\nStructured Profile: {details}"
+
+        return {
+            "conversation": conversation,
+            "idea_context": profile,
+            "startup_profile": profile,
+            "questions_asked": questions_asked,
+            "ready_for_analysis": True,
+            "reply": reply_msg,
+            "choices": ["Run Multi-Agent Analysis Now", "Add Specific Competitor Details"],
+            "user_query": compiled_query,
+            "mode": "validation",
+        }
+
     conv_prompt = f"""
 You are the Lead Validation Analyst for VentureIQ (a top YC-level startup advisor).
 Conduct a high-rigor discovery conversation to refine the founder's pitch before multi-agent validation.

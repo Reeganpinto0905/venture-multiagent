@@ -131,9 +131,11 @@ def invoke_gemini(
 
     if use_cache:
         cached_res = cache_store.get(cache_key)
-        if cached_res:
+        if cached_res is not None:
             _STATS["cache_hits"] += 1
             print(f"[GEMINI CACHE HIT] phase: {phase} | model: {primary_model}")
+            if isinstance(cached_res, (dict, list)):
+                return json.dumps(cached_res)
             return str(cached_res)
 
     _STATS["total_calls"] += 1
