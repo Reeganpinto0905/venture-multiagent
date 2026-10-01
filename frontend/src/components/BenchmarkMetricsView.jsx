@@ -1,12 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import {
   Activity,
-  AlertTriangle,
-  ArrowRight,
   BarChart3,
   CheckCircle2,
   CheckSquare,
-  Database,
   GitBranch,
   Layers,
   RefreshCw,
@@ -15,7 +12,6 @@ import {
   Sparkles,
   Timer,
   TrendingUp,
-  Zap,
 } from 'lucide-react'
 import { fetchAIBenchmark, validateAIReply } from '../services/api.js'
 

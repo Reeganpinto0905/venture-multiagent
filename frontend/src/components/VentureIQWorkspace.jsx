@@ -8,7 +8,6 @@ import {
   Check,
   CheckCircle2,
   ChevronDown,
-  ChevronRight,
   CircleHelp,
   Compass,
   Copy,
@@ -16,9 +15,7 @@ import {
   DollarSign,
   Download,
   Ellipsis,
-  ExternalLink,
   FileText,
-  Flame,
   Home,
   Layers,
   LineChart,
@@ -29,15 +26,12 @@ import {
   Search,
   Settings,
   Share2,
-  ShieldAlert,
-  ShieldCheck,
   Sparkles as SparklesIcon,
   Target,
   Trash2,
   TrendingUp,
   Users,
   X,
-  Zap,
 } from 'lucide-react'
 import IntelligenceCore from './IntelligenceCore.jsx'
 import BenchmarkMetricsView from './BenchmarkMetricsView.jsx'
