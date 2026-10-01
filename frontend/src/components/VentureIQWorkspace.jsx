@@ -2085,6 +2085,8 @@ ${result.risk_analysis || 'N/A'}
                       </div>
                     </div>
                   )}
+
+                  {reportTab === 'metrics' && <BenchmarkMetricsView />}
                 </div>
               </section>
             )

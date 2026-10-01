@@ -101,9 +101,9 @@ export async function validateAIReply(text, query = null) {
       unsupported_claim_rate: '0.0%',
       matched_entities_count: 3,
       matched_entities: [
-        { title: 'Airbnb', category: 'companies', verified: 'machine-confirmed', source: 'startup_successes_detailed.pdf' },
-        { title: 'Quibi', category: 'companies', verified: 'machine-confirmed', source: 'startup_failures_detailedv2.pdf' },
-        { title: 'Sprig', category: 'companies', verified: 'machine-confirmed', source: 'startup_failures_detailedv2.pdf' },
+        { title: 'Airbnb', category: 'companies', verified: 'machine-confirmed', source: 'Startup Successes Knowledge Base' },
+        { title: 'Quibi', category: 'companies', verified: 'machine-confirmed', source: 'Startup Failures Knowledge Base' },
+        { title: 'Sprig', category: 'companies', verified: 'machine-confirmed', source: 'Startup Failures Knowledge Base' },
       ],
       checks: [
         { name: 'Empirical Grounding Check', passed: true, score: 100.0, detail: 'Matched 3 verified OKF entity references' },

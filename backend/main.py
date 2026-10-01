@@ -1,4 +1,5 @@
 import os
+import re
 import json
 import hashlib
 import threading
@@ -39,7 +40,7 @@ origins = [
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
-    allow_origin_regex=r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$",
+    allow_origin_regex=r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$|^https://.*\.vercel\.app$|^https://.*\.trycloudflare\.com$|^https://.*\.onrender\.com$",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -161,11 +162,13 @@ def validate_ai_reply(data: ValidateReplyRequest):
         for eid, entity in bundle.entities.items():
             name = entity.title.lower()
             if len(name) > 3 and name in lower_text:
+                src_name = entity.sources[0].document if entity.sources else "OKF v0.2"
+                clean_src = re.sub(r"\.pdf$", "", src_name).replace("_", " ").title()
                 matched_entities.append({
                     "title": entity.title,
                     "category": entity.category,
                     "verified": entity.verified,
-                    "source": entity.sources[0].document if entity.sources else "OKF v0.2"
+                    "source": clean_src
                 })
 
     # 2. Automated Quality & Evidence Checks
