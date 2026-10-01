@@ -105,9 +105,18 @@ class OKFBundle:
         return self
 
 
-_DEFAULT_BUNDLE_PATH = os.path.abspath(
-    os.path.join(os.path.dirname(os.path.dirname(__file__)), "knowledge_data", "startup_diligence_bundle")
-)
+_ENV_BUNDLE_PATH = os.getenv("OKF_BUNDLE_PATH")
+if _ENV_BUNDLE_PATH:
+    if not os.path.isabs(_ENV_BUNDLE_PATH):
+        _DEFAULT_BUNDLE_PATH = os.path.abspath(
+            os.path.join(os.path.dirname(os.path.dirname(__file__)), _ENV_BUNDLE_PATH)
+        )
+    else:
+        _DEFAULT_BUNDLE_PATH = os.path.abspath(_ENV_BUNDLE_PATH)
+else:
+    _DEFAULT_BUNDLE_PATH = os.path.abspath(
+        os.path.join(os.path.dirname(os.path.dirname(__file__)), "knowledge_data", "startup_diligence_bundle")
+    )
 _BUNDLE_INSTANCE: Optional[OKFBundle] = None
 
 
