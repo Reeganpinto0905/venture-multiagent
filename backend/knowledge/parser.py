@@ -4,7 +4,6 @@ OKF v0.2 Parser: Serializes and deserializes OKF entity markdown files with YAML
 
 import re
 import yaml
-from typing import Tuple, Dict, Any, Optional
 from knowledge.schema import OKFEntity, OKFSource, OKFRelationship
 
 

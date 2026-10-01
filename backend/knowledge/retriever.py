@@ -4,7 +4,7 @@ Replaces the old vector-database RAG with structured OKF entity discovery and re
 """
 
 import os
-from typing import Dict, List, Optional, Any, Tuple
+from typing import Dict, List, Optional, Any
 from knowledge.schema import OKFEntity, OKFSource
 from knowledge.loader import get_default_bundle
 from knowledge.index import OKFKnowledgeIndex
